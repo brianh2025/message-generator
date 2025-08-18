@@ -2,44 +2,42 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     
-    <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#3b82f6"/>
+    <!-- PWA & 主題顏色 -->
+    <meta name="theme-color" content="#ffffff"/>
     <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="https://img.icons8.com/plasticine/192/chat-bubble-with-gears.png">
+
+    <!-- iOS/iPadOS 圖示 -->
+    <link rel="apple-touch-icon" href="https://img.icons8.com/fluency/192/settings-3.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <title>工務訊息產生器 (Gemini 增強版)</title>
+    <!-- 瀏覽器分頁圖示 (Favicon) -->
+    <link rel="icon" href="https://img.icons8.com/fluency/48/settings-3.png" type="image/png">
+    
+    <!-- Windows 動態磚圖示 -->
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="https://img.icons8.com/fluency/144/settings-3.png">
+
+    <title>工務訊息產生器 (Pro)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></link>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
+        html, body {
+            overscroll-behavior-y: contain;
+            -webkit-tap-highlight-color: transparent;
+        }
         body {
             font-family: 'Noto Sans TC', sans-serif;
             background-color: #f0f2f5;
         }
-        .card {
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
-        .card:hover {
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-        }
-        .btn {
-            transition: all 0.2s ease;
-        }
-        .btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-        }
-        .form-select, .form-input, .form-textarea {
-            border-radius: 8px;
+        .form-input, .form-select, .form-textarea {
+            border-radius: 0.5rem;
             border-color: #d1d5db;
         }
-        .form-select:focus, .form-input:focus, .form-textarea:focus {
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
             border-color: #3b82f6;
             box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
             outline: none;
@@ -47,7 +45,7 @@
         .output-area {
             background-color: #f9fafb;
             border: 1px dashed #d1d5db;
-            border-radius: 8px;
+            border-radius: 0.5rem;
             white-space: pre-wrap;
             word-wrap: break-word;
             cursor: text;
@@ -57,373 +55,342 @@
             box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
             outline: none;
         }
-        .gemini-btn {
-            background-color: #ede9fe;
-            color: #5b21b6;
-        }
-        .gemini-btn:hover:not(:disabled) {
-             background-color: #dcd7fe;
-        }
-        input:disabled {
-            background-color: #f3f4f6;
-            cursor: not-allowed;
-        }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
-    <div class="w-full max-w-2xl mx-auto">
-        <div class="card p-6 sm:p-8">
-            <div class="text-center mb-8">
-                <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">工務訊息產生器 ✨</h1>
-                <p class="text-gray-500 mt-2">快速生成 LINE 群組的標準回報訊息 (Gemini 增強版)</p>
-            </div>
+<body class="bg-gray-100">
 
+    <div class="max-w-lg mx-auto bg-white min-h-screen shadow-lg">
+        <!-- Header -->
+        <header class="bg-blue-500 text-white p-4 text-center sticky top-0 z-10 shadow-md">
+            <h1 id="headerTitle" class="text-xl font-bold">工務訊息產生器</h1>
+        </header>
+
+        <!-- Content Area -->
+        <main class="content p-4 space-y-4">
             <!-- Message Type Selector -->
-            <div class="mb-6">
-                <label for="messageType" class="block text-sm font-medium text-gray-700 mb-2">訊息類型</label>
-                <select id="messageType" class="w-full p-3 form-select">
-                    <option value="general">一般訊息</option>
-                    <option value="meeting">會議通知</option>
+            <div>
+                <label for="messageType" class="block text-sm font-medium text-gray-700 mb-1">訊息類型</label>
+                <select id="messageType" class="w-full p-3 form-select shadow-sm">
+                    <option value="general">臨時佈達</option>
+                    <option value="test">試驗通知</option>
                     <option value="car">公務車借用</option>
                 </select>
             </div>
 
-            <!-- Input Fields -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                <!-- Title -->
-                <div class="md:col-span-2">
-                    <label for="title" class="block text-sm font-medium text-gray-700">標題 <span class="text-red-500">*</span></label>
-                    <div class="mt-1 flex rounded-md shadow-sm">
-                        <input type="text" id="title" class="flex-1 min-w-0 block w-full px-3 py-3 rounded-none rounded-l-md form-input" placeholder="例如：系統維護通知">
-                        <button id="optimizeTitleBtn" type="button" class="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 gemini-btn text-sm btn">
-                            <span class="btn-text">✨ 優化</span>
-                            <i class="fas fa-spinner fa-spin ml-2 hidden"></i>
-                        </button>
+            <!-- Fields Container -->
+            <div class="space-y-4">
+                <!-- General Fields (臨時佈達) -->
+                <div id="generalFields" class="space-y-4">
+                    <div>
+                        <label for="generalContent" class="block text-sm font-medium text-gray-700">內容 <span class="text-red-500">*</span></label>
+                        <textarea id="generalContent" rows="5" class="mt-1 w-full p-3 form-textarea shadow-sm" placeholder="請輸入要佈達的內容..."></textarea>
                     </div>
                 </div>
 
-                <!-- Date & Time -->
-                <div>
-                    <label for="date" class="block text-sm font-medium text-gray-700">日期 <span class="text-red-500">*</span></label>
-                    <input type="date" id="date" class="mt-1 w-full p-3 form-input">
-                </div>
-                <div>
-                    <label for="time" class="block text-sm font-medium text-gray-700">時間 <span class="text-red-500">*</span></label>
-                    <input type="time" id="time" class="mt-1 w-full p-3 form-input">
-                </div>
-
-                <!-- Location / Destination -->
-                <div class="md:col-span-2">
-                    <label for="location" id="locationLabel" class="block text-sm font-medium text-gray-700">地點 <span class="text-red-500">*</span></label>
-                    <input type="text" id="location" class="mt-1 w-full p-3 form-input" placeholder="格式：大樓名稱_樓層_會議室">
-                </div>
-                
-                <!-- Car Specific Fields (Now Empty) -->
-                <div id="carFields" class="hidden md:col-span-2">
-                    <!-- Intentionally left blank as per request -->
-                </div>
-
-
-                <!-- Meeting Specific Fields -->
-                <div id="meetingFields" class="hidden md:col-span-2 grid grid-cols-1 gap-y-4">
-                    <div>
-                        <label for="attendees" class="block text-sm font-medium text-gray-700">與會人員</label>
-                        <input type="text" id="attendees" class="mt-1 w-full p-3 form-input" placeholder="例如：各部門主管、專案成員">
-                    </div>
-                    <div>
-                         <label for="documents" class="block text-sm font-medium text-gray-700">會議議程 / 應備文件</label>
-                        <div class="mt-1">
-                           <textarea id="documents" rows="4" class="w-full p-3 form-textarea" placeholder="可手動輸入，或點擊下方按鈕由 AI 生成議程"></textarea>
+                <!-- Test Fields (試驗通知) -->
+                <div id="testFields" class="hidden space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="testDate" class="block text-sm font-medium text-gray-700">試驗日期 <span class="text-red-500">*</span></label>
+                            <input type="date" id="testDate" class="mt-1 w-full p-3 form-input shadow-sm">
                         </div>
-                        <button id="generateAgendaBtn" class="mt-2 w-full sm:w-auto inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 btn">
-                            <span class="btn-text">✨ AI 產生會議議程</span>
-                            <i class="fas fa-spinner fa-spin ml-2 hidden"></i>
-                        </button>
+                        <div>
+                            <label for="testTime" class="block text-sm font-medium text-gray-700">試驗時間 <span class="text-red-500">*</span></label>
+                            <input type="time" id="testTime" class="mt-1 w-full p-3 form-input shadow-sm">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="samplingLocation" class="block text-sm font-medium text-gray-700">取樣位置 <span class="text-red-500">*</span></label>
+                        <input type="text" id="samplingLocation" class="mt-1 w-full p-3 form-input shadow-sm" placeholder="例如：A棟一樓樑柱">
+                    </div>
+                     <div>
+                        <label for="materialAge" class="block text-sm font-medium text-gray-700">材齡 <span class="text-red-500">*</span></label>
+                        <input type="text" id="materialAge" class="mt-1 w-full p-3 form-input shadow-sm" placeholder="例如：7天、28天">
+                    </div>
+                    <div>
+                        <label for="testLocation" class="block text-sm font-medium text-gray-700">試驗地點 <span class="text-red-500">*</span></label>
+                        <input type="text" id="testLocation" class="mt-1 w-full p-3 form-input shadow-sm" placeholder="例如：XX實驗室">
+                    </div>
+                    <div>
+                        <label for="willAttend" class="block text-sm font-medium text-gray-700">是否會驗 <span class="text-red-500">*</span></label>
+                        <select id="willAttend" class="w-full p-3 form-select shadow-sm mt-1">
+                            <option value="是">是</option>
+                            <option value="否">否</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Car Fields (公務車借用) -->
+                <div id="carFields" class="hidden space-y-4">
+                     <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="carStartDate" class="block text-sm font-medium text-gray-700">借用日期 <span class="text-red-500">*</span></label>
+                            <input type="date" id="carStartDate" class="mt-1 w-full p-3 form-input shadow-sm">
+                        </div>
+                        <div>
+                            <label for="carStartTime" class="block text-sm font-medium text-gray-700">借用時間 <span class="text-red-500">*</span></label>
+                            <input type="time" id="carStartTime" class="mt-1 w-full p-3 form-input shadow-sm">
+                        </div>
+                    </div>
+                     <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="carEndDate" class="block text-sm font-medium text-gray-700">歸還日期 <span class="text-red-500">*</span></label>
+                            <input type="date" id="carEndDate" class="mt-1 w-full p-3 form-input shadow-sm">
+                        </div>
+                        <div>
+                            <label for="carEndTime" class="block text-sm font-medium text-gray-700">歸還時間 <span class="text-red-500">*</span></label>
+                            <input type="time" id="carEndTime" class="mt-1 w-full p-3 form-input shadow-sm">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="carDestination" class="block text-sm font-medium text-gray-700">目的地 <span class="text-red-500">*</span></label>
+                        <input type="text" id="carDestination" class="mt-1 w-full p-3 form-input shadow-sm" placeholder="例如：市政府">
+                    </div>
+                    <div>
+                        <label for="borrower" class="block text-sm font-medium text-gray-700">借用人 <span class="text-red-500">*</span></label>
+                        <input type="text" id="borrower" class="mt-1 w-full p-3 form-input shadow-sm" placeholder="請輸入姓名">
                     </div>
                 </div>
             </div>
 
             <!-- Action Button -->
-            <div class="mt-8">
-                <button id="generateBtn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg btn shadow-md">
+            <div class="pt-4">
+                <button id="generateBtn" class="w-full bg-blue-500 text-white font-bold py-3 px-4 rounded-lg shadow-md hover:bg-blue-600 transition-transform transform hover:scale-105">
                     <i class="fas fa-paper-plane mr-2"></i>產生訊息
                 </button>
             </div>
 
             <!-- Output Area -->
-            <div id="outputContainer" class="mt-8 hidden">
+            <div id="outputContainer" class="hidden pt-4">
                 <h3 class="text-lg font-semibold text-gray-700 mb-2">產生的訊息 (可直接編輯)：</h3>
                 <div id="output" class="p-4 output-area min-h-[150px]" contenteditable="true"></div>
-                 <div id="messageBox" class="hidden mt-2 text-sm text-center p-2 rounded-md"></div>
-                 <div class="flex flex-col sm:flex-row gap-2 mt-4">
-                    <button id="copyBtn" class="w-full sm:w-1/2 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg btn shadow-md">
+                <div class="flex flex-col sm:flex-row gap-2 mt-4">
+                    <button id="copyBtn" class="w-full sm:w-1/2 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg shadow-md">
                         <i class="fas fa-copy mr-2"></i>複製訊息
                     </button>
-                    <button id="calendarBtn" class="w-full sm:w-1/2 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg btn shadow-md hidden">
+                    <button id="calendarBtn" class="w-full sm:w-1/2 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg shadow-md">
                         <i class="fas fa-calendar-plus mr-2"></i>新增至日曆
                     </button>
                 </div>
             </div>
-        </div>
+        </main>
+        
+        <!-- Toast Notification -->
+        <div id="toast" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-md shadow-lg z-50"></div>
     </div>
 
     <script>
         // --- PWA Service Worker Registration ---
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then(registration => {
-                        console.log('ServiceWorker Registration successful with scope: ', registration.scope);
-                    })
-                    .catch(err => {
-                        console.log('ServiceWorker Registration failed: ', err);
-                    });
+                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW reg failed: ', err));
             });
         }
-
-        // --- DOM Elements ---
-        const messageTypeSelect = document.getElementById('messageType');
-        const locationLabel = document.getElementById('locationLabel');
-        const meetingFields = document.getElementById('meetingFields');
-        const carFields = document.getElementById('carFields');
-        const generateBtn = document.getElementById('generateBtn');
-        const outputContainer = document.getElementById('outputContainer');
-        const outputDiv = document.getElementById('output');
-        const copyBtn = document.getElementById('copyBtn');
-        const calendarBtn = document.getElementById('calendarBtn');
-        const messageBox = document.getElementById('messageBox');
-        const optimizeTitleBtn = document.getElementById('optimizeTitleBtn');
-        const generateAgendaBtn = document.getElementById('generateAgendaBtn');
-
-        // --- Input fields ---
-        const titleInput = document.getElementById('title');
-        const dateInput = document.getElementById('date');
-        const timeInput = document.getElementById('time');
-        const locationInput = document.getElementById('location');
-        const attendeesInput = document.getElementById('attendees');
-        const documentsInput = document.getElementById('documents');
-
-        // --- State ---
-        let calendarEvent = {};
-
-        // --- Initial Setup ---
-        const today = new Date();
-        const yyyy = today.getFullYear();
-        const mm = String(today.getMonth() + 1).padStart(2, '0');
-        const dd = String(today.getDate()).padStart(2, '0');
-        dateInput.value = `${yyyy}-${mm}-${dd}`;
-
-        // --- Gemini API Configuration ---
-        const API_KEY = ""; // Leave this empty
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${API_KEY}`;
         
-        // --- Event Listeners ---
-        messageTypeSelect.addEventListener('change', handleMessageTypeChange);
-        generateBtn.addEventListener('click', generateFinalMessage);
-        copyBtn.addEventListener('click', copyMessageToClipboard);
-        calendarBtn.addEventListener('click', handleAddToCalendar);
-        optimizeTitleBtn.addEventListener('click', handleOptimizeTitle);
-        generateAgendaBtn.addEventListener('click', handleGenerateAgenda);
-        
-        // --- Core Functions ---
-        
-        function handleMessageTypeChange() {
-            const type = messageTypeSelect.value;
-            meetingFields.classList.toggle('hidden', type !== 'meeting');
-            carFields.classList.toggle('hidden', type !== 'car');
-            generateAgendaBtn.classList.toggle('hidden', type !== 'meeting');
-
-            if (type === 'car') {
-                locationLabel.innerHTML = '目的地 <span class="text-red-500">*</span>';
-                locationInput.placeholder = "請輸入目的地";
-                titleInput.value = "公務車借用";
-                titleInput.disabled = true;
-                optimizeTitleBtn.disabled = true;
-
-            } else {
-                locationLabel.innerHTML = '地點 <span class="text-red-500">*</span>';
-                locationInput.placeholder = "格式：大樓名稱_樓層_會議室";
-                if (titleInput.value === "公務車借用") {
-                    titleInput.value = "";
-                }
-                titleInput.disabled = false;
-                optimizeTitleBtn.disabled = false;
-            }
-        }
-
-        async function handleOptimizeTitle() {
-            const originalTitle = titleInput.value.trim();
-            if (!originalTitle) {
-                showToast('請先輸入標題！', 'error');
-                return;
-            }
-            const prompt = `請將這個標題潤飾得更專業、更正式，但保持簡潔有力。請只回傳優化後的標題文字，不要包含任何其他說明或引號。\n\n原始標題：「${originalTitle}」`;
-            toggleButtonLoading(optimizeTitleBtn, true);
-            try {
-                const responseText = await callGeminiWithExponentialBackoff(prompt);
-                titleInput.value = responseText.trim().replace(/["'\[\]]/g, '');
-                showToast('標題已優化！', 'success');
-            } catch (error) {
-                showToast('標題優化失敗，請稍後再試。', 'error');
-            } finally {
-                toggleButtonLoading(optimizeTitleBtn, false);
-            }
-        }
-
-        async function handleGenerateAgenda() {
-            const title = titleInput.value.trim();
-            if (!title) {
-                showToast('請先輸入會議標題！', 'error');
-                return;
-            }
-            const prompt = `你是一位專業的會議助理。請根據會議標題「${title}」，生出一份簡潔、專業的議程。請直接輸出議程內容，使用條列式呈現 (例如：1. ... 2. ...)，不要包含「議程」這個標題或任何開頭/結尾的客套話。`;
-            toggleButtonLoading(generateAgendaBtn, true);
-            try {
-                const responseText = await callGeminiWithExponentialBackoff(prompt);
-                documentsInput.value = responseText.trim();
-                showToast('會議議程已產生！', 'success');
-            } catch (error) {
-                showToast('議程產生失敗，請稍後再試。', 'error');
-            } finally {
-                toggleButtonLoading(generateAgendaBtn, false);
-            }
-        }
-        
-        function generateFinalMessage() {
-            const title = titleInput.value.trim();
-            const dateValue = dateInput.value;
-            const timeValue = timeInput.value;
-            const location = locationInput.value.trim();
-            const type = messageTypeSelect.value;
-
-            if (!title || !dateValue || !timeValue || !location) {
-                showToast('標題、日期、時間和地點/目的地為必填欄位！', 'error');
-                return;
-            }
-
-            const formattedDate = dateValue.replace(/-/g, '/');
-            const formattedStartTime = formatTime(timeValue);
-            let message = `[${title}]\n`;
-            let fullDescription = "";
-            
-            if (type === 'general') {
-                message += `日期：${formattedDate}\n`;
-                message += `時間：${formattedStartTime}\n`;
-                message += `地點：${location}`;
-                fullDescription = message;
-            } else if (type === 'meeting') {
-                message += `日期：${formattedDate}\n`;
-                message += `時間：${formattedStartTime}\n`;
-                message += `地點：${location}`;
-                const attendees = attendeesInput.value.trim();
-                const documents = documentsInput.value.trim();
-                if (attendees) message += `\n與會人員：${attendees}`;
-                if (documents) message += `\n會議議程/應備文件：\n${documents}`;
-                fullDescription = message.replace(`[${title}]\n`, "");
-            } else if (type === 'car') {
-                message += `借用日期：${formattedDate}\n`;
-                message += `借用時間：${formattedStartTime}\n`;
-                message += `目的地：${location}`;
-                fullDescription = message.replace(`[${title}]\n`, "");
-            }
-
-            const tags = `#${title.replace(/\s+/g, '')}`;
-            message += `\n\n${tags}`;
-            
-            message = message.replace(/ /g, '');
-
-            outputDiv.innerText = message;
-            outputContainer.classList.remove('hidden');
-            
-            // For calendar event, set a default duration of 1 hour if no end time is provided.
-            const eventEndTime = new Date(new Date(`1970-01-01T${timeValue}`).getTime() + 60 * 60 * 1000).toTimeString().slice(0,5);
-
-            calendarEvent = {
-                title: `[${type === 'car' ? '公務車' : (type === 'meeting' ? '會議' : '一般')}] ${title}`,
-                startDate: dateValue,
-                startTime: timeValue,
-                endTime: eventEndTime,
-                location: location,
-                description: fullDescription.replace(/ /g, '')
+        document.addEventListener('DOMContentLoaded', () => {
+            // DOM Elements
+            const dom = {
+                messageType: document.getElementById('messageType'),
+                generalFields: document.getElementById('generalFields'),
+                testFields: document.getElementById('testFields'),
+                carFields: document.getElementById('carFields'),
+                generateBtn: document.getElementById('generateBtn'),
+                outputContainer: document.getElementById('outputContainer'),
+                output: document.getElementById('output'),
+                copyBtn: document.getElementById('copyBtn'),
+                calendarBtn: document.getElementById('calendarBtn'),
+                toast: document.getElementById('toast'),
+                // Fields
+                generalContent: document.getElementById('generalContent'),
+                testDate: document.getElementById('testDate'),
+                testTime: document.getElementById('testTime'),
+                samplingLocation: document.getElementById('samplingLocation'),
+                materialAge: document.getElementById('materialAge'),
+                testLocation: document.getElementById('testLocation'),
+                willAttend: document.getElementById('willAttend'),
+                carStartDate: document.getElementById('carStartDate'),
+                carStartTime: document.getElementById('carStartTime'),
+                carEndDate: document.getElementById('carEndDate'),
+                carEndTime: document.getElementById('carEndTime'),
+                carDestination: document.getElementById('carDestination'),
+                borrower: document.getElementById('borrower'),
             };
-            calendarBtn.classList.remove('hidden');
 
-            showToast('訊息已成功產生！', 'success');
-        }
+            let calendarEvent = {};
 
-        function handleAddToCalendar() {
-            if(!calendarEvent.title) return;
-            const formatForGoogle = (date, time) => `${date.replace(/-/g, '')}T${time.replace(/:/g, '')}00`;
-            const googleDates = `${formatForGoogle(calendarEvent.startDate, calendarEvent.startTime)}/${formatForGoogle(calendarEvent.startDate, calendarEvent.endTime)}`;
-            const url = new URL('https://www.google.com/calendar/render');
-            url.searchParams.append('action', 'TEMPLATE');
-            url.searchParams.append('text', calendarEvent.title);
-            url.searchParams.append('dates', googleDates);
-            url.searchParams.append('location', calendarEvent.location);
-            url.searchParams.append('details', calendarEvent.description);
-            window.open(url.toString(), '_blank');
-        }
-
-        function copyMessageToClipboard() {
-            const textToCopy = outputDiv.innerText;
-            if (!textToCopy) return;
-            navigator.clipboard.writeText(textToCopy)
-                .then(() => showToast('訊息已複製到剪貼簿！', 'success'))
-                .catch(() => showToast('複製失敗', 'error'));
-        }
-        
-        async function callGeminiWithExponentialBackoff(prompt, maxRetries = 3) {
-            let attempt = 0;
-            let delay = 1000;
-            const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
-            while (attempt < maxRetries) {
-                try {
-                    const response = await fetch(API_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                    const result = await response.json();
-                    if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
-                        return result.candidates[0].content.parts[0].text;
-                    } else {
-                        throw new Error('Invalid response structure from Gemini API.');
-                    }
-                } catch (error) {
-                    attempt++;
-                    if (attempt >= maxRetries) throw error;
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                    delay *= 2;
+            // --- UI & Utility Functions ---
+            const ui = {
+                showToast: (message) => {
+                    dom.toast.textContent = message;
+                    dom.toast.classList.remove('hidden');
+                    setTimeout(() => dom.toast.classList.add('hidden'), 2500);
+                },
+                updateFormVisibility: () => {
+                    const type = dom.messageType.value;
+                    dom.generalFields.classList.toggle('hidden', type !== 'general');
+                    dom.testFields.classList.toggle('hidden', type !== 'test');
+                    dom.carFields.classList.toggle('hidden', type !== 'car');
+                },
+                formatDateTime: (date, time) => {
+                    const d = new Date(`${date}T${time}`);
+                    const year = d.getFullYear();
+                    const month = String(d.getMonth() + 1).padStart(2, '0');
+                    const day = String(d.getDate()).padStart(2, '0');
+                    const period = d.getHours() >= 12 ? '下午' : '上午';
+                    let hour = d.getHours() % 12;
+                    if (hour === 0) hour = 12;
+                    const minute = String(d.getMinutes()).padStart(2, '0');
+                    return `${year}/${month}/${day} ${period}${hour}:${minute}`;
+                },
+                 formatCurrentDateTime: () => {
+                    const d = new Date();
+                    return ui.formatDateTime(
+                        `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`,
+                        `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+                    );
                 }
-            }
-        }
+            };
 
-        const formatTime = (timeValue) => {
-            const [hour, minute] = timeValue.split(':');
-            const period = parseInt(hour) >= 12 ? '下午' : '上午';
-            let formattedHour = parseInt(hour) % 12;
-            if (formattedHour === 0) formattedHour = 12;
-            return `${period}${String(formattedHour).padStart(2, '0')}:${minute}`;
-        };
+            // --- Event Handlers & Logic ---
+            const handlers = {
+                generateMessage: () => {
+                    const type = dom.messageType.value;
+                    let message = '', title = '', isValid = true;
+                    calendarEvent = {};
 
-        function toggleButtonLoading(button, isLoading) {
-            button.disabled = isLoading;
-            const textSpan = button.querySelector('.btn-text');
-            const spinnerIcon = button.querySelector('i');
-            textSpan.classList.toggle('hidden', isLoading);
-            spinnerIcon.classList.toggle('hidden', !isLoading);
-        }
+                    switch (type) {
+                        case 'general':
+                            const content = dom.generalContent.value.trim();
+                            if (!content) { isValid = false; break; }
+                            title = '臨時佈達';
+                            message = `[${title}]\n`;
+                            message += `傳送時間：${ui.formatCurrentDateTime()}\n`;
+                            message += `內容：\n${content}`;
+                            // No calendar event for general announcements
+                            dom.calendarBtn.classList.add('hidden');
+                            break;
 
-        function showToast(message, type = 'success') {
-            messageBox.textContent = message;
-            messageBox.className = 'mt-2 text-sm text-center p-2 rounded-md';
-            messageBox.classList.add(type === 'success' ? 'bg-green-100' : 'bg-red-100', type === 'success' ? 'text-green-700' : 'text-red-700');
-            setTimeout(() => { messageBox.classList.add('hidden'); }, 3000);
-        }
-        
-        // Initial call to set up the form correctly
-        handleMessageTypeChange();
+                        case 'test':
+                            const testData = {
+                                date: dom.testDate.value,
+                                time: dom.testTime.value,
+                                sampling: dom.samplingLocation.value.trim(),
+                                age: dom.materialAge.value.trim(),
+                                location: dom.testLocation.value.trim(),
+                                attend: dom.willAttend.value
+                            };
+                            if (!testData.date || !testData.time || !testData.sampling || !testData.age || !testData.location) {
+                                isValid = false; break;
+                            }
+                            title = '試驗通知';
+                            message = `[${title}]\n`;
+                            message += `試驗時間：${ui.formatDateTime(testData.date, testData.time)}\n`;
+                            message += `取樣位置：${testData.sampling}\n`;
+                            message += `材齡：${testData.age}\n`;
+                            message += `試驗地點：${testData.location}\n`;
+                            message += `是否會驗：${testData.attend}`;
+                            
+                            calendarEvent = {
+                                title: `[試驗] ${testData.sampling}`,
+                                startDate: testData.date,
+                                startTime: testData.time,
+                                location: testData.location,
+                                description: message
+                            };
+                            dom.calendarBtn.classList.remove('hidden');
+                            break;
+
+                        case 'car':
+                            const carData = {
+                                startDate: dom.carStartDate.value,
+                                startTime: dom.carStartTime.value,
+                                endDate: dom.carEndDate.value,
+                                endTime: dom.carEndTime.value,
+                                destination: dom.carDestination.value.trim(),
+                                user: dom.borrower.value.trim(),
+                            };
+                            if (!carData.startDate || !carData.startTime || !carData.endDate || !carData.endTime || !carData.destination || !carData.user) {
+                                isValid = false; break;
+                            }
+                            title = '公務車借用';
+                            message = `[${title}]\n`;
+                            message += `借用時間：${ui.formatDateTime(carData.startDate, carData.startTime)}\n`;
+                            message += `預計歸還：${ui.formatDateTime(carData.endDate, carData.endTime)}\n`;
+                            message += `目的地：${carData.destination}\n`;
+                            message += `借用人：${carData.user}`;
+
+                            calendarEvent = {
+                                title: `[公務車] ${carData.user} - ${carData.destination}`,
+                                startDate: carData.startDate,
+                                startTime: carData.startTime,
+                                endDate: carData.endDate,
+                                endTime: carData.endTime,
+                                location: carData.destination,
+                                description: message
+                            };
+                            dom.calendarBtn.classList.remove('hidden');
+                            break;
+                    }
+
+                    if (!isValid) {
+                        return ui.showToast('請填寫所有必填欄位！');
+                    }
+
+                    const tag = `#${title}`;
+                    message += `\n\n${tag}`;
+
+                    dom.output.innerText = message.replace(/ /g, '');
+                    dom.outputContainer.classList.remove('hidden');
+                    ui.showToast('訊息已成功產生！');
+                },
+
+                copyToClipboard: () => {
+                    const textToCopy = dom.output.innerText;
+                    if (!textToCopy) return;
+                    navigator.clipboard.writeText(textToCopy)
+                        .then(() => ui.showToast('訊息已複製！'))
+                        .catch(() => ui.showToast('複製失敗'));
+                },
+
+                addToCalendar: () => {
+                    if (!calendarEvent.title) return;
+                    const formatForGoogle = (date, time) => `${date.replace(/-/g, '')}T${time.replace(/:/g, '')}00`;
+                    
+                    let googleDates;
+                    if(calendarEvent.endDate) { // For car rental with start and end
+                         googleDates = `${formatForGoogle(calendarEvent.startDate, calendarEvent.startTime)}/${formatForGoogle(calendarEvent.endDate, calendarEvent.endTime)}`;
+                    } else { // For test notice with only start time (default 1 hour)
+                        const endTime = new Date(new Date(`${calendarEvent.startDate}T${calendarEvent.startTime}`).getTime() + 60 * 60 * 1000).toTimeString().slice(0, 5);
+                        googleDates = `${formatForGoogle(calendarEvent.startDate, calendarEvent.startTime)}/${formatForGoogle(calendarEvent.startDate, endTime)}`;
+                    }
+
+                    const url = new URL('https://www.google.com/calendar/render');
+                    url.searchParams.append('action', 'TEMPLATE');
+                    url.searchParams.append('text', calendarEvent.title);
+                    url.searchParams.append('dates', googleDates);
+                    url.searchParams.append('location', calendarEvent.location);
+                    url.searchParams.append('details', calendarEvent.description);
+                    window.open(url.toString(), '_blank');
+                }
+            };
+
+            // --- Initial Setup & Event Listeners ---
+            const init = () => {
+                // Set default dates
+                const today = new Date();
+                const todayString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+                [dom.testDate, dom.carStartDate, dom.carEndDate].forEach(el => el.value = todayString);
+
+                dom.messageType.addEventListener('change', ui.updateFormVisibility);
+                dom.generateBtn.addEventListener('click', handlers.generateMessage);
+                dom.copyBtn.addEventListener('click', handlers.copyToClipboard);
+                dom.calendarBtn.addEventListener('click', handlers.addToCalendar);
+                
+                ui.updateFormVisibility();
+            };
+
+            init();
+        });
     </script>
 </body>
 </html>
