@@ -23,6 +23,8 @@
     <title>工務訊息產生器 (Pro)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></link>
+    <!-- OCR Library -->
+    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
         html, body {
@@ -36,10 +38,11 @@
         .form-input, .form-select, .form-textarea {
             border-radius: 0.5rem;
             border-color: #d1d5db;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
         .form-input:focus, .form-select:focus, .form-textarea:focus {
             border-color: #3b82f6;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
             outline: none;
         }
         .output-area {
@@ -52,8 +55,22 @@
         }
         .output-area:focus {
             border-color: #3b82f6;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
             outline: none;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -61,24 +78,28 @@
 
     <div class="max-w-lg mx-auto bg-white min-h-screen shadow-lg">
         <!-- Header -->
-        <header class="bg-blue-500 text-white p-4 text-center sticky top-0 z-10 shadow-md">
-            <h1 id="headerTitle" class="text-xl font-bold">工務訊息產生器</h1>
+        <header class="bg-blue-600 text-white p-4 text-center sticky top-0 z-10 shadow-md flex justify-between items-center">
+            <h1 id="headerTitle" class="text-lg sm:text-xl font-bold">工務訊息產生器</h1>
+            <button id="clearBtn" title="清除所有欄位" class="text-white hover:bg-blue-700 p-2 rounded-full transition-colors">
+                <i class="fas fa-broom"></i>
+            </button>
         </header>
 
         <!-- Content Area -->
-        <main class="content p-4 space-y-4">
+        <main class="content p-3 sm:p-4 space-y-4 pb-24 no-scrollbar">
             <!-- Message Type Selector -->
             <div>
                 <label for="messageType" class="block text-sm font-medium text-gray-700 mb-1">訊息類型</label>
-                <select id="messageType" class="w-full p-3 form-select shadow-sm">
+                <select id="messageType" class="w-full p-3 form-select shadow-sm bg-white">
                     <option value="general">臨時佈達</option>
                     <option value="test">試驗通知</option>
                     <option value="car">公務車借用</option>
+                    <option value="referral">訊息轉知</option>
                 </select>
             </div>
 
             <!-- Fields Container -->
-            <div class="space-y-4">
+            <div id="fieldsContainer" class="space-y-4">
                 <!-- General Fields (臨時佈達) -->
                 <div id="generalFields" class="space-y-4">
                     <div>
@@ -89,150 +110,158 @@
 
                 <!-- Test Fields (試驗通知) -->
                 <div id="testFields" class="hidden space-y-4">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label for="testDate" class="block text-sm font-medium text-gray-700">試驗日期 <span class="text-red-500">*</span></label>
-                            <input type="date" id="testDate" class="mt-1 w-full p-3 form-input shadow-sm">
-                        </div>
-                        <div>
-                            <label for="testTime" class="block text-sm font-medium text-gray-700">試驗時間 <span class="text-red-500">*</span></label>
-                            <input type="time" id="testTime" class="mt-1 w-full p-3 form-input shadow-sm">
-                        </div>
-                    </div>
-                    <div>
-                        <label for="samplingLocation" class="block text-sm font-medium text-gray-700">取樣位置 <span class="text-red-500">*</span></label>
-                        <input type="text" id="samplingLocation" class="mt-1 w-full p-3 form-input shadow-sm" placeholder="例如：A棟一樓樑柱">
-                    </div>
-                     <div>
-                        <label for="materialAge" class="block text-sm font-medium text-gray-700">材齡 <span class="text-red-500">*</span></label>
-                        <input type="text" id="materialAge" class="mt-1 w-full p-3 form-input shadow-sm" placeholder="例如：7天、28天">
-                    </div>
-                    <div>
-                        <label for="testLocation" class="block text-sm font-medium text-gray-700">試驗地點 <span class="text-red-500">*</span></label>
-                        <input type="text" id="testLocation" class="mt-1 w-full p-3 form-input shadow-sm" placeholder="例如：XX實驗室">
-                    </div>
-                    <div>
-                        <label for="willAttend" class="block text-sm font-medium text-gray-700">是否會驗 <span class="text-red-500">*</span></label>
-                        <select id="willAttend" class="w-full p-3 form-select shadow-sm mt-1">
-                            <option value="是">是</option>
-                            <option value="否">否</option>
-                        </select>
-                    </div>
+                    <!-- Test fields will be added here via JS -->
                 </div>
 
                 <!-- Car Fields (公務車借用) -->
                 <div id="carFields" class="hidden space-y-4">
-                     <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label for="carStartDate" class="block text-sm font-medium text-gray-700">借用日期 <span class="text-red-500">*</span></label>
-                            <input type="date" id="carStartDate" class="mt-1 w-full p-3 form-input shadow-sm">
-                        </div>
-                        <div>
-                            <label for="carStartTime" class="block text-sm font-medium text-gray-700">借用時間 <span class="text-red-500">*</span></label>
-                            <input type="time" id="carStartTime" class="mt-1 w-full p-3 form-input shadow-sm">
-                        </div>
+                    <!-- Car fields will be added here via JS -->
+                </div>
+
+                <!-- Referral Fields (訊息轉知) -->
+                <div id="referralFields" class="hidden space-y-4">
+                    <div>
+                        <label for="referralSource" class="block text-sm font-medium text-gray-700">來自 <span class="text-red-500">*</span></label>
+                        <input type="text" id="referralSource" class="mt-1 w-full p-3 form-input shadow-sm" placeholder="例如：市府、營造廠">
                     </div>
-                     <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label for="carEndDate" class="block text-sm font-medium text-gray-700">歸還日期 <span class="text-red-500">*</span></label>
-                            <input type="date" id="carEndDate" class="mt-1 w-full p-3 form-input shadow-sm">
+                            <label for="referralDate" class="block text-sm font-medium text-gray-700">收到日期</label>
+                            <input type="date" id="referralDate" class="mt-1 w-full p-3 form-input shadow-sm">
                         </div>
                         <div>
-                            <label for="carEndTime" class="block text-sm font-medium text-gray-700">歸還時間 <span class="text-red-500">*</span></label>
-                            <input type="time" id="carEndTime" class="mt-1 w-full p-3 form-input shadow-sm">
+                            <label for="referralTime" class="block text-sm font-medium text-gray-700">收到時間</label>
+                            <input type="time" id="referralTime" class="mt-1 w-full p-3 form-input shadow-sm">
                         </div>
                     </div>
                     <div>
-                        <label for="carDestination" class="block text-sm font-medium text-gray-700">目的地 <span class="text-red-500">*</span></label>
-                        <input type="text" id="carDestination" class="mt-1 w-full p-3 form-input shadow-sm" placeholder="例如：市政府">
+                        <label for="contactMethod" class="block text-sm font-medium text-gray-700">聯絡方式 <span class="text-red-500">*</span></label>
+                        <select id="contactMethod" class="w-full p-3 form-select shadow-sm mt-1 bg-white">
+                            <option value="LINE">LINE</option>
+                            <option value="MAIL">MAIL</option>
+                            <option value="公文">公文</option>
+                            <option value="親臨">親臨</option>
+                        </select>
                     </div>
-                    <div>
-                        <label for="borrower" class="block text-sm font-medium text-gray-700">借用人 <span class="text-red-500">*</span></label>
-                        <input type="text" id="borrower" class="mt-1 w-full p-3 form-input shadow-sm" placeholder="請輸入姓名">
+                     <div>
+                        <label for="referralContent" class="block text-sm font-medium text-gray-700">內容 <span class="text-red-500">*</span></label>
+                        <div class="mt-1">
+                             <label for="fileUpload" class="w-full inline-flex items-center justify-center px-4 py-2 bg-gray-200 text-gray-700 rounded-md shadow-sm cursor-pointer hover:bg-gray-300 mb-2">
+                                <i class="fas fa-upload mr-2"></i>
+                                <span>上傳圖片辨識文字</span>
+                                <div id="ocrLoader" class="loader ml-2 hidden"></div>
+                            </label>
+                            <input type="file" id="fileUpload" class="hidden" accept="image/*">
+                            <textarea id="referralContent" rows="5" class="w-full p-3 form-textarea shadow-sm" placeholder="請輸入轉知的訊息內容，或上傳圖片自動辨識..."></textarea>
+                        </div>
                     </div>
                 </div>
             </div>
 
+            <!-- Personnel Mention Selector -->
+            <div>
+                <label for="mentionPerson" class="block text-sm font-medium text-gray-700 mb-1">標註人員</label>
+                <select id="mentionPerson" class="w-full p-3 form-select shadow-sm bg-white">
+                    <option value="">不標註</option>
+                    <option value="所長">所長</option>
+                    <option value="吳淵文主任">吳淵文主任</option>
+                    <option value="張皓翔">張皓翔</option>
+                    <option value="陳彥宏">陳彥宏</option>
+                    <option value="莊美玲">莊美玲</option>
+                    <option value="機電梁耀元">機電梁耀元</option>
+                    <option value="林義傑">林義傑</option>
+                    <option value="品管陳煌奇">品管陳煌奇</option>
+                </select>
+                <p class="text-xs text-gray-500 mt-1">轉貼後，刪除人名可重新標註</p>
+            </div>
+
             <!-- Action Button -->
             <div class="pt-4">
-                <button id="generateBtn" class="w-full bg-blue-500 text-white font-bold py-3 px-4 rounded-lg shadow-md hover:bg-blue-600 transition-transform transform hover:scale-105">
+                <button id="generateBtn" class="w-full bg-blue-500 text-white font-bold py-3 px-4 rounded-lg shadow-md hover:bg-blue-600 transition-transform transform hover:scale-105 active:scale-100">
                     <i class="fas fa-paper-plane mr-2"></i>產生訊息
                 </button>
             </div>
 
             <!-- Output Area -->
             <div id="outputContainer" class="hidden pt-4">
-                <h3 class="text-lg font-semibold text-gray-700 mb-2">產生的訊息 (可直接編輯)：</h3>
+                 <h3 class="text-lg font-semibold text-gray-700 mb-2">產生的訊息 (可直接編輯)：</h3>
                 <div id="output" class="p-4 output-area min-h-[150px]" contenteditable="true"></div>
+                <!-- Responsive Button Group using Flexbox -->
                 <div class="flex flex-col sm:flex-row gap-2 mt-4">
-                    <button id="copyBtn" class="w-full sm:w-1/2 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg shadow-md">
-                        <i class="fas fa-copy mr-2"></i>複製訊息
+                    <button id="copyBtn" class="w-full sm:flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg shadow-md flex items-center justify-center">
+                        <i class="fas fa-copy mr-2"></i><span>複製</span>
                     </button>
-                    <button id="calendarBtn" class="w-full sm:w-1/2 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg shadow-md">
-                        <i class="fas fa-calendar-plus mr-2"></i>新增至日曆
+                    <button id="shareBtn" class="w-full sm:flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg shadow-md flex items-center justify-center">
+                        <i class="fas fa-share-alt mr-2"></i><span>分享</span>
+                    </button>
+                    <button id="calendarBtn" class="w-full sm:flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg shadow-md flex items-center justify-center">
+                        <i class="fas fa-calendar-plus mr-2"></i><span>新增至日曆</span>
                     </button>
                 </div>
             </div>
         </main>
         
         <!-- Toast Notification -->
-        <div id="toast" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-md shadow-lg z-50"></div>
+        <div id="toast" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-md shadow-lg z-50 transition-opacity duration-300"></div>
     </div>
 
     <script>
-        // --- PWA Service Worker Registration ---
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW reg failed: ', err));
-            });
-        }
-        
         document.addEventListener('DOMContentLoaded', () => {
-            // DOM Elements
-            const dom = {
+            // --- DOM Elements ---
+            // Populated immediately to avoid reference errors.
+            let dom = {
                 messageType: document.getElementById('messageType'),
+                fieldsContainer: document.getElementById('fieldsContainer'),
                 generalFields: document.getElementById('generalFields'),
                 testFields: document.getElementById('testFields'),
                 carFields: document.getElementById('carFields'),
+                referralFields: document.getElementById('referralFields'),
                 generateBtn: document.getElementById('generateBtn'),
+                clearBtn: document.getElementById('clearBtn'),
                 outputContainer: document.getElementById('outputContainer'),
                 output: document.getElementById('output'),
                 copyBtn: document.getElementById('copyBtn'),
+                shareBtn: document.getElementById('shareBtn'),
                 calendarBtn: document.getElementById('calendarBtn'),
                 toast: document.getElementById('toast'),
-                // Fields
                 generalContent: document.getElementById('generalContent'),
-                testDate: document.getElementById('testDate'),
-                testTime: document.getElementById('testTime'),
-                samplingLocation: document.getElementById('samplingLocation'),
-                materialAge: document.getElementById('materialAge'),
-                testLocation: document.getElementById('testLocation'),
-                willAttend: document.getElementById('willAttend'),
-                carStartDate: document.getElementById('carStartDate'),
-                carStartTime: document.getElementById('carStartTime'),
-                carEndDate: document.getElementById('carEndDate'),
-                carEndTime: document.getElementById('carEndTime'),
-                carDestination: document.getElementById('carDestination'),
-                borrower: document.getElementById('borrower'),
+                referralSource: document.getElementById('referralSource'),
+                referralDate: document.getElementById('referralDate'),
+                referralTime: document.getElementById('referralTime'),
+                contactMethod: document.getElementById('contactMethod'),
+                fileUpload: document.getElementById('fileUpload'),
+                ocrLoader: document.getElementById('ocrLoader'),
+                referralContent: document.getElementById('referralContent'),
+                mentionPerson: document.getElementById('mentionPerson'),
+                // Dynamic elements will be added later
+                inputs: [],
             };
-
-            let calendarEvent = {};
 
             // --- UI & Utility Functions ---
             const ui = {
-                showToast: (message) => {
+                showToast: (message, isError = false) => {
                     dom.toast.textContent = message;
-                    dom.toast.classList.remove('hidden');
-                    setTimeout(() => dom.toast.classList.add('hidden'), 2500);
+                    dom.toast.className = `fixed bottom-5 left-1/2 -translate-x-1/2 text-white px-4 py-2 rounded-md shadow-lg z-50 transition-opacity duration-300 ${isError ? 'bg-red-600' : 'bg-gray-800'}`;
+                    dom.toast.classList.remove('hidden', 'opacity-0');
+                    dom.toast.classList.add('opacity-100');
+                    setTimeout(() => {
+                        dom.toast.classList.remove('opacity-100');
+                        dom.toast.classList.add('opacity-0');
+                        setTimeout(() => dom.toast.classList.add('hidden'), 300);
+                    }, 3000);
                 },
                 updateFormVisibility: () => {
                     const type = dom.messageType.value;
                     dom.generalFields.classList.toggle('hidden', type !== 'general');
                     dom.testFields.classList.toggle('hidden', type !== 'test');
                     dom.carFields.classList.toggle('hidden', type !== 'car');
+                    dom.referralFields.classList.toggle('hidden', type !== 'referral');
+                    dom.outputContainer.classList.add('hidden');
                 },
                 formatDateTime: (date, time) => {
+                    if (!date || !time) return '';
                     const d = new Date(`${date}T${time}`);
+                    if (isNaN(d)) return '';
                     const year = d.getFullYear();
                     const month = String(d.getMonth() + 1).padStart(2, '0');
                     const day = String(d.getDate()).padStart(2, '0');
@@ -251,7 +280,75 @@
                 }
             };
 
+            // --- State Management ---
+            const APP_STATE_KEY = 'constructionAppProState';
+            const state = {
+                save: () => {
+                    const currentState = {};
+                    dom.inputs.forEach(input => {
+                        if(document.body.contains(input)) {
+                           currentState[input.id] = input.value;
+                        }
+                    });
+                    localStorage.setItem(APP_STATE_KEY, JSON.stringify(currentState));
+                },
+                load: () => {
+                    const savedState = JSON.parse(localStorage.getItem(APP_STATE_KEY));
+                    if (savedState) {
+                        dom.inputs.forEach(input => {
+                           if (document.body.contains(input) && savedState[input.id] !== undefined) {
+                                input.value = savedState[input.id];
+                            }
+                        });
+                    }
+                },
+                clear: () => {
+                    localStorage.removeItem(APP_STATE_KEY);
+                    dom.inputs.forEach(input => {
+                        if(!document.body.contains(input)) return;
+                        if (input.type === 'select-one') {
+                            input.selectedIndex = 0;
+                        } else if (input.type !== 'date' && input.type !== 'time') {
+                            input.value = '';
+                        }
+                    });
+                    const today = new Date();
+                    const todayString = today.toISOString().slice(0, 10);
+                    const timeString = today.toTimeString().slice(0, 5);
+                    document.querySelectorAll('input[type="date"]').forEach(el => el.value = todayString);
+                    document.querySelectorAll('input[type="time"]').forEach(el => el.value = timeString);
+                    dom.outputContainer.classList.add('hidden');
+                    ui.showToast('欄位已清除');
+                }
+            };
+
+            // --- OCR Handler ---
+            const handleFileUpload = async (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                dom.ocrLoader.classList.remove('hidden');
+                ui.showToast('圖片辨識中，請稍候...');
+
+                try {
+                    const worker = await Tesseract.createWorker('eng+chi_tra');
+                    const { data: { text } } = await worker.recognize(file);
+                    const existingText = dom.referralContent.value;
+                    dom.referralContent.value = existingText ? `${existingText}\n\n--- (辨識內容) ---\n${text}` : text;
+                    await worker.terminate();
+                    ui.showToast('文字辨識成功！');
+                    state.save();
+                } catch (error) {
+                    console.error('OCR Error:', error);
+                    ui.showToast('文字辨識失敗，請重試。', true);
+                } finally {
+                    dom.ocrLoader.classList.add('hidden');
+                    event.target.value = ''; 
+                }
+            };
+
             // --- Event Handlers & Logic ---
+            let calendarEvent = {};
             const handlers = {
                 generateMessage: () => {
                     const type = dom.messageType.value;
@@ -263,87 +360,63 @@
                             const content = dom.generalContent.value.trim();
                             if (!content) { isValid = false; break; }
                             title = '臨時佈達';
-                            message = `[${title}]\n`;
-                            message += `傳送時間：${ui.formatCurrentDateTime()}\n`;
-                            message += `內容：\n${content}`;
-                            // No calendar event for general announcements
+                            message = `[${title}]\n傳送時間：${ui.formatCurrentDateTime()}\n內容：\n${content}`;
                             dom.calendarBtn.classList.add('hidden');
+                            dom.shareBtn.classList.remove('hidden');
                             break;
 
                         case 'test':
                             const testData = {
-                                date: dom.testDate.value,
-                                time: dom.testTime.value,
-                                sampling: dom.samplingLocation.value.trim(),
-                                age: dom.materialAge.value.trim(),
-                                location: dom.testLocation.value.trim(),
-                                attend: dom.willAttend.value
+                                date: dom.testDate.value, time: dom.testTime.value, sampling: dom.samplingLocation.value.trim(),
+                                age: dom.materialAge.value.trim(), location: dom.testLocation.value.trim(), attend: dom.willAttend.value
                             };
-                            if (!testData.date || !testData.time || !testData.sampling || !testData.age || !testData.location) {
-                                isValid = false; break;
-                            }
+                            if (!testData.date || !testData.time || !testData.sampling || !testData.age || !testData.location) { isValid = false; break; }
                             title = '試驗通知';
-                            message = `[${title}]\n`;
-                            message += `試驗時間：${ui.formatDateTime(testData.date, testData.time)}\n`;
-                            message += `取樣位置：${testData.sampling}\n`;
-                            message += `材齡：${testData.age}\n`;
-                            message += `試驗地點：${testData.location}\n`;
-                            message += `是否會驗：${testData.attend}`;
-                            
-                            calendarEvent = {
-                                title: `[試驗] ${testData.sampling}`,
-                                startDate: testData.date,
-                                startTime: testData.time,
-                                location: testData.location,
-                                description: message
-                            };
+                            message = `[${title}]\n試驗時間：${ui.formatDateTime(testData.date, testData.time)}\n取樣位置：${testData.sampling}\n材齡：${testData.age}\n試驗地點：${testData.location}\n是否會驗：${testData.attend}`;
+                            calendarEvent = { title: `[試驗] ${testData.sampling}`, startDate: testData.date, startTime: testData.time, location: testData.location, description: message };
                             dom.calendarBtn.classList.remove('hidden');
+                            dom.shareBtn.classList.remove('hidden');
                             break;
 
                         case 'car':
                             const carData = {
-                                startDate: dom.carStartDate.value,
-                                startTime: dom.carStartTime.value,
-                                endDate: dom.carEndDate.value,
-                                endTime: dom.carEndTime.value,
-                                destination: dom.carDestination.value.trim(),
-                                user: dom.borrower.value.trim(),
+                                startDate: dom.carStartDate.value, startTime: dom.carStartTime.value, endDate: dom.carEndDate.value,
+                                endTime: dom.carEndTime.value, destination: dom.carDestination.value.trim(), user: dom.borrower.value.trim(),
                             };
-                            if (!carData.startDate || !carData.startTime || !carData.endDate || !carData.endTime || !carData.destination || !carData.user) {
-                                isValid = false; break;
-                            }
+                            if (!carData.startDate || !carData.startTime || !carData.endDate || !carData.endTime || !carData.destination || !carData.user) { isValid = false; break; }
                             title = '公務車借用';
-                            message = `[${title}]\n`;
-                            message += `借用時間：${ui.formatDateTime(carData.startDate, carData.startTime)}\n`;
-                            message += `預計歸還：${ui.formatDateTime(carData.endDate, carData.endTime)}\n`;
-                            message += `目的地：${carData.destination}\n`;
-                            message += `借用人：${carData.user}`;
-
-                            calendarEvent = {
-                                title: `[公務車] ${carData.user} - ${carData.destination}`,
-                                startDate: carData.startDate,
-                                startTime: carData.startTime,
-                                endDate: carData.endDate,
-                                endTime: carData.endTime,
-                                location: carData.destination,
-                                description: message
-                            };
+                            message = `[${title}]\n借用時間：${ui.formatDateTime(carData.startDate, carData.startTime)}\n預計歸還：${ui.formatDateTime(carData.endDate, carData.endTime)}\n目的地：${carData.destination}\n借用人：${carData.user}`;
+                            calendarEvent = { title: `[公務車] ${carData.user} - ${carData.destination}`, startDate: carData.startDate, startTime: carData.startTime, endDate: carData.endDate, endTime: carData.endTime, location: carData.destination, description: message };
                             dom.calendarBtn.classList.remove('hidden');
+                            dom.shareBtn.classList.remove('hidden');
+                            break;
+                        
+                        case 'referral':
+                            const referralData = {
+                                source: dom.referralSource.value.trim(), date: dom.referralDate.value, time: dom.referralTime.value,
+                                method: dom.contactMethod.value, content: dom.referralContent.value.trim()
+                            };
+                            if (!referralData.source || !referralData.content) { isValid = false; break; }
+                            title = '訊息轉知';
+                            message = `[${title}]\n來自：${referralData.source}\n`;
+                            if(referralData.date && referralData.time){ message += `收到時間：${ui.formatDateTime(referralData.date, referralData.time)}\n`; }
+                            message += `聯絡方式：${referralData.method}\n內容：\n${referralData.content}`;
+                            dom.calendarBtn.classList.add('hidden');
+                            dom.shareBtn.classList.remove('hidden');
                             break;
                     }
 
-                    if (!isValid) {
-                        return ui.showToast('請填寫所有必填欄位！');
+                    if (!isValid) { return ui.showToast('請填寫所有必填欄位！', true); }
+                    
+                    const personToMention = dom.mentionPerson.value;
+                    if (personToMention) {
+                        message += `\n\n@${personToMention}`;
                     }
 
-                    const tag = `#${title}`;
-                    message += `\n\n${tag}`;
-
-                    dom.output.innerText = message.replace(/ /g, '');
+                    dom.output.innerText = message;
                     dom.outputContainer.classList.remove('hidden');
-                    ui.showToast('訊息已成功產生！');
+                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
                 },
-
                 copyToClipboard: () => {
                     const textToCopy = dom.output.innerText;
                     if (!textToCopy) return;
@@ -351,15 +424,30 @@
                         .then(() => ui.showToast('訊息已複製！'))
                         .catch(() => ui.showToast('複製失敗'));
                 },
-
+                shareMessage: async () => {
+                    const textToShare = dom.output.innerText;
+                    if (!textToShare) return;
+                    if (navigator.share) {
+                        try {
+                            await navigator.share({
+                                title: `工務訊息：${document.querySelector('#messageType option:checked').textContent}`,
+                                text: textToShare,
+                            });
+                        } catch (err) {
+                            console.error('Share failed:', err);
+                        }
+                    } else {
+                        ui.showToast('您的瀏覽器不支援分享功能');
+                    }
+                },
                 addToCalendar: () => {
                     if (!calendarEvent.title) return;
                     const formatForGoogle = (date, time) => `${date.replace(/-/g, '')}T${time.replace(/:/g, '')}00`;
                     
                     let googleDates;
-                    if(calendarEvent.endDate) { // For car rental with start and end
-                         googleDates = `${formatForGoogle(calendarEvent.startDate, calendarEvent.startTime)}/${formatForGoogle(calendarEvent.endDate, calendarEvent.endTime)}`;
-                    } else { // For test notice with only start time (default 1 hour)
+                    if(calendarEvent.endDate) { // For car rental
+                        googleDates = `${formatForGoogle(calendarEvent.startDate, calendarEvent.startTime)}/${formatForGoogle(calendarEvent.endDate, calendarEvent.endTime)}`;
+                    } else { // For test notice (default 1 hour)
                         const endTime = new Date(new Date(`${calendarEvent.startDate}T${calendarEvent.startTime}`).getTime() + 60 * 60 * 1000).toTimeString().slice(0, 5);
                         googleDates = `${formatForGoogle(calendarEvent.startDate, calendarEvent.startTime)}/${formatForGoogle(calendarEvent.startDate, endTime)}`;
                     }
@@ -373,21 +461,76 @@
                     window.open(url.toString(), '_blank');
                 }
             };
+            
+            // --- Dynamic Field Generation ---
+            function createDynamicFields() {
+                // Test Fields HTML
+                dom.testFields.innerHTML = `
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label for="testDate" class="block text-sm font-medium text-gray-700">試驗日期 <span class="text-red-500">*</span></label><input type="date" id="testDate" class="mt-1 w-full p-3 form-input shadow-sm"></div>
+                        <div><label for="testTime" class="block text-sm font-medium text-gray-700">試驗時間 <span class="text-red-500">*</span></label><input type="time" id="testTime" class="mt-1 w-full p-3 form-input shadow-sm"></div>
+                    </div>
+                    <div><label for="samplingLocation" class="block text-sm font-medium text-gray-700">取樣位置 <span class="text-red-500">*</span></label><input type="text" id="samplingLocation" class="mt-1 w-full p-3 form-input shadow-sm" placeholder="例如：A棟一樓樑柱"></div>
+                    <div><label for="materialAge" class="block text-sm font-medium text-gray-700">材齡 <span class="text-red-500">*</span></label><input type="text" id="materialAge" class="mt-1 w-full p-3 form-input shadow-sm" placeholder="例如：7天、28天"></div>
+                    <div><label for="testLocation" class="block text-sm font-medium text-gray-700">試驗地點 <span class="text-red-500">*</span></label><input type="text" id="testLocation" class="mt-1 w-full p-3 form-input shadow-sm" placeholder="例如：XX實驗室"></div>
+                    <div><label for="willAttend" class="block text-sm font-medium text-gray-700">是否會驗 <span class="text-red-500">*</span></label><select id="willAttend" class="w-full p-3 form-select shadow-sm mt-1 bg-white"><option value="是">是</option><option value="否">否</option></select></div>`;
 
-            // --- Initial Setup & Event Listeners ---
-            const init = () => {
-                // Set default dates
+                // Car Fields HTML
+                dom.carFields.innerHTML = `
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label for="carStartDate" class="block text-sm font-medium text-gray-700">借用日期 <span class="text-red-500">*</span></label><input type="date" id="carStartDate" class="mt-1 w-full p-3 form-input shadow-sm"></div>
+                        <div><label for="carStartTime" class="block text-sm font-medium text-gray-700">借用時間 <span class="text-red-500">*</span></label><input type="time" id="carStartTime" class="mt-1 w-full p-3 form-input shadow-sm"></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label for="carEndDate" class="block text-sm font-medium text-gray-700">歸還日期 <span class="text-red-500">*</span></label><input type="date" id="carEndDate" class="mt-1 w-full p-3 form-input shadow-sm"></div>
+                        <div><label for="carEndTime" class="block text-sm font-medium text-gray-700">歸還時間 <span class="text-red-500">*</span></label><input type="time" id="carEndTime" class="mt-1 w-full p-3 form-input shadow-sm"></div>
+                    </div>
+                    <div><label for="carDestination" class="block text-sm font-medium text-gray-700">目的地 <span class="text-red-500">*</span></label><input type="text" id="carDestination" class="mt-1 w-full p-3 form-input shadow-sm" placeholder="例如：市政府"></div>
+                    <div><label for="borrower" class="block text-sm font-medium text-gray-700">借用人 <span class="text-red-500">*</span></label><input type="text" id="borrower" class="mt-1 w-full p-3 form-input shadow-sm" placeholder="請輸入姓名"></div>`;
+                
+                // Add references for dynamically created elements to the dom object
+                dom.testDate = document.getElementById('testDate');
+                dom.testTime = document.getElementById('testTime');
+                dom.samplingLocation = document.getElementById('samplingLocation');
+                dom.materialAge = document.getElementById('materialAge');
+                dom.testLocation = document.getElementById('testLocation');
+                dom.willAttend = document.getElementById('willAttend');
+                dom.carStartDate = document.getElementById('carStartDate');
+                dom.carStartTime = document.getElementById('carStartTime');
+                dom.carEndDate = document.getElementById('carEndDate');
+                dom.carEndTime = document.getElementById('carEndTime');
+                dom.carDestination = document.getElementById('carDestination');
+                dom.borrower = document.getElementById('borrower');
+
+                // Re-collect all inputs after creation to include dynamic ones and the mention dropdown
+                dom.inputs = Array.from(document.querySelectorAll('#fieldsContainer input, #fieldsContainer select, #fieldsContainer textarea, #mentionPerson'));
+            }
+
+            // --- Initialization ---
+            function init() {
+                createDynamicFields();
+
+                // Set default dates and times
                 const today = new Date();
-                const todayString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-                [dom.testDate, dom.carStartDate, dom.carEndDate].forEach(el => el.value = todayString);
+                const todayString = today.toISOString().slice(0, 10);
+                const timeString = today.toTimeString().slice(0, 5);
+                document.querySelectorAll('input[type="date"]').forEach(el => el.value = todayString);
+                document.querySelectorAll('input[type="time"]').forEach(el => el.value = timeString);
 
+                state.load();
+                ui.updateFormVisibility();
+                if (!navigator.share) { dom.shareBtn.classList.add('hidden'); }
+
+                // Add event listeners
                 dom.messageType.addEventListener('change', ui.updateFormVisibility);
                 dom.generateBtn.addEventListener('click', handlers.generateMessage);
+                dom.clearBtn.addEventListener('click', state.clear);
                 dom.copyBtn.addEventListener('click', handlers.copyToClipboard);
+                dom.shareBtn.addEventListener('click', handlers.shareMessage);
                 dom.calendarBtn.addEventListener('click', handlers.addToCalendar);
-                
-                ui.updateFormVisibility();
-            };
+                dom.fileUpload.addEventListener('change', handleFileUpload);
+                dom.inputs.forEach(input => { input.addEventListener('input', state.save); });
+            }
 
             init();
         });
