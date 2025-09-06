@@ -549,7 +549,7 @@
 
                     switch (type) {
                         case 'inspection':
-                            const selectedPositions = Array.from(dom.inspectionPositionCheckboxes.querySelectorAll('input:checked')).map(cb => cb.value).join('、');
+                            const selectedPositions = Array.from(dom.inspectionPositionCheckboxes.querySelectorAll('input:checked')).map(cb => cb.getAttribute('value')).join('、');
                             const inspData = {
                                 type: dom.inspectionType.value, projectName: dom.inspectionProjectName.value.trim(), location: dom.inspectionLocation.value.trim(),
                                 positions: selectedPositions, date: dom.inspectionDate.value, result: dom.inspectionResult.value,
