@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     
     <!-- PWA & 主題顏色 -->
-    <meta name="theme-color" content="#ffffff"/>
+    <meta name="theme-color" content="#1e293b"/>
     <link rel="manifest" href="manifest.json">
 
     <!-- iOS/iPadOS 圖示 -->
@@ -17,7 +17,7 @@
     <link rel="icon" href="https://img.icons8.com/fluency/48/settings-3.png" type="image/png">
     
     <!-- Windows 動態磚圖示 -->
-    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileColor" content="#1e293b">
     <meta name="msapplication-TileImage" content="https://img.icons8.com/fluency/144/settings-3.png">
 
     <title>工務訊息產生器 (Pro)</title>
@@ -33,21 +33,54 @@
         }
         body {
             font-family: 'Noto Sans TC', sans-serif;
-            background-color: #f0f2f5;
+            background-color: #f1f5f9; /* slate-100 */
         }
         .form-input, .form-select, .form-textarea {
+            background-color: #f8fafc; /* slate-50 */
+            border-width: 2px;
+            border-color: #e2e8f0; /* slate-200 */
             border-radius: 0.5rem;
-            border-color: #d1d5db;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
         .form-input:focus, .form-select:focus, .form-textarea:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+            border-color: #3b82f6; /* blue-500 */
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
             outline: none;
         }
+        
+        /* Custom Checkbox Styling */
+        .form-checkbox-custom {
+            -webkit-appearance: none;
+            appearance: none;
+            background-color: #fff;
+            margin: 0;
+            font: inherit;
+            color: currentColor;
+            width: 1.15em;
+            height: 1.15em;
+            border: 0.15em solid currentColor;
+            border-radius: 0.25em;
+            transform: translateY(-0.075em);
+            display: grid;
+            place-content: center;
+        }
+        .form-checkbox-custom::before {
+            content: "";
+            width: 0.65em;
+            height: 0.65em;
+            transform: scale(0);
+            transition: 120ms transform ease-in-out;
+            box-shadow: inset 1em 1em #3b82f6;
+            transform-origin: bottom left;
+            clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+        }
+        .form-checkbox-custom:checked::before {
+            transform: scale(1);
+        }
+
         .output-area {
-            background-color: #f9fafb;
-            border: 1px dashed #d1d5db;
+            background-color: #f8fafc; /* slate-50 */
+            border: 2px dashed #cbd5e1; /* slate-300 */
             border-radius: 0.5rem;
             white-space: pre-wrap;
             word-wrap: break-word;
@@ -55,14 +88,14 @@
         }
         .output-area:focus {
             border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
             outline: none;
         }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .loader {
             border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
+            border-top: 4px solid #3b82f6;
             border-radius: 50%;
             width: 20px;
             height: 20px;
@@ -72,25 +105,41 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        .toast-enter {
+            opacity: 0;
+            transform: translate(-50%, 20px);
+        }
+        .toast-enter-active {
+            opacity: 1;
+            transform: translate(-50%, 0);
+        }
+        .toast-exit {
+            opacity: 1;
+            transform: translate(-50%, 0);
+        }
+        .toast-exit-active {
+            opacity: 0;
+            transform: translate(-50%, 20px);
+        }
     </style>
 </head>
-<body class="bg-gray-100">
+<body class="bg-slate-100">
 
-    <div class="max-w-lg mx-auto bg-white min-h-screen shadow-lg">
+    <div class="max-w-lg mx-auto bg-slate-100 min-h-screen">
         <!-- Header -->
-        <header class="bg-blue-600 text-white p-4 text-center sticky top-0 z-10 shadow-md flex justify-between items-center">
-            <h1 id="headerTitle" class="text-lg sm:text-xl font-bold">工務訊息產生器</h1>
-            <button id="clearBtn" title="清除所有欄位" class="text-white hover:bg-blue-700 p-2 rounded-full transition-colors">
-                <i class="fas fa-broom"></i>
+        <header class="bg-gradient-to-r from-slate-800 to-slate-600 text-white p-5 text-center sticky top-0 z-20 shadow-lg flex justify-between items-center">
+            <h1 id="headerTitle" class="text-xl font-bold tracking-wider">工務訊息產生器 Pro</h1>
+            <button id="clearBtn" title="清除所有欄位" class="text-white hover:bg-slate-700/50 p-2 rounded-full transition-colors duration-200">
+                <i class="fas fa-broom fa-lg"></i>
             </button>
         </header>
 
         <!-- Content Area -->
-        <main class="content p-3 sm:p-4 space-y-4 pb-24 no-scrollbar">
-            <!-- Message Type Selector -->
-            <div>
-                <label for="messageType" class="block text-sm font-medium text-gray-700 mb-1">訊息類型</label>
-                <select id="messageType" class="w-full p-3 form-select shadow-sm bg-white">
+        <main class="content p-3 sm:p-4 space-y-5 pb-24 no-scrollbar">
+            <!-- Message Type Selector Card -->
+            <div class="bg-white p-4 sm:p-6 rounded-xl shadow-md">
+                 <label for="messageType" class="block text-sm font-medium text-slate-600 mb-2">訊息類型</label>
+                <select id="messageType" class="w-full p-3 form-select text-base">
                     <option value="inspection">本日自檢/查驗進度</option>
                     <option value="workReport">出工回報</option>
                     <option value="test">試驗通知</option>
@@ -98,33 +147,56 @@
                     <option value="referral">訊息轉知</option>
                 </select>
             </div>
+            
 
             <!-- Fields Container -->
-            <div id="fieldsContainer" class="space-y-4">
+            <div id="fieldsContainer" class="space-y-5">
                 <!-- Inspection Fields (本日自檢/查驗進度) -->
-                <div id="inspectionFields" class="hidden space-y-4">
+                <div id="inspectionFields" class="hidden space-y-4 bg-white p-4 sm:p-6 rounded-xl shadow-md">
+                    <h2 class="text-lg font-semibold text-slate-700 border-b-2 border-slate-200 pb-3 mb-4">查驗進度回報</h2>
                     <div>
-                        <label for="inspectionType" class="block text-sm font-medium text-gray-700">檢查類別 <span class="text-red-500">*</span></label>
-                         <select id="inspectionType" class="w-full p-3 form-select shadow-sm mt-1 bg-white">
-                            <option value="自主檢查">自主檢查</option>
+                        <label for="inspectionType" class="block text-sm font-medium text-slate-600 mb-1">檢查類別 <span class="text-red-500">*</span></label>
+                         <select id="inspectionType" class="w-full p-3 form-select">
+                            <option value="自檢">自檢</option>
                             <option value="監造查驗">監造查驗</option>
                         </select>
                     </div>
                     <div>
-                        <label for="inspectionProjectName" class="block text-sm font-medium text-gray-700">分項名稱 <span class="text-red-500">*</span></label>
-                        <input type="text" id="inspectionProjectName" class="mt-1 w-full p-3 form-input shadow-sm" placeholder="例如：模板組立、鋼筋綁紮">
+                        <label for="inspectionProjectName" class="block text-sm font-medium text-slate-600 mb-1">分項名稱 <span class="text-red-500">*</span></label>
+                        <input type="text" id="inspectionProjectName" class="mt-1 w-full p-3 form-input" placeholder="例如：模板組立、鋼筋綁紮">
                     </div>
                     <div>
-                        <label for="inspectionLocation" class="block text-sm font-medium text-gray-700">檢查樓層位置 <span class="text-red-500">*</span></label>
-                        <input type="text" id="inspectionLocation" class="mt-1 w-full p-3 form-input shadow-sm" placeholder="例如：R1F、A棟2F">
+                        <label for="inspectionLocation" class="block text-sm font-medium text-slate-600 mb-1">樓層 <span class="text-red-500">*</span></label>
+                        <input type="text" id="inspectionLocation" class="mt-1 w-full p-3 form-input" placeholder="例如：R1F、A棟2F">
                     </div>
                     <div>
-                        <label for="inspectionDate" class="block text-sm font-medium text-gray-700">檢查日期 <span class="text-red-500">*</span></label>
-                        <input type="date" id="inspectionDate" class="mt-1 w-full p-3 form-input shadow-sm">
+                        <label class="block text-sm font-medium text-slate-600 mb-1">檢查位置 <span class="text-red-500">*</span></label>
+                        <div id="inspectionPositionCheckboxes" class="mt-2 grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <label class="flex items-center space-x-3 p-3 bg-slate-50 rounded-lg border-2 border-slate-200 cursor-pointer hover:border-blue-400 transition-colors">
+                                <input type="checkbox" class="form-checkbox-custom text-blue-600" value="柱" name="inspectionPosition">
+                                <span class="font-medium text-slate-700">柱</span>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 bg-slate-50 rounded-lg border-2 border-slate-200 cursor-pointer hover:border-blue-400 transition-colors">
+                                <input type="checkbox" class="form-checkbox-custom text-blue-600" value="梁" name="inspectionPosition">
+                                <span class="font-medium text-slate-700">梁</span>
+                            </label>
+                             <label class="flex items-center space-x-3 p-3 bg-slate-50 rounded-lg border-2 border-slate-200 cursor-pointer hover:border-blue-400 transition-colors">
+                                <input type="checkbox" class="form-checkbox-custom text-blue-600" value="版" name="inspectionPosition">
+                                <span class="font-medium text-slate-700">版</span>
+                            </label>
+                             <label class="flex items-center space-x-3 p-3 bg-slate-50 rounded-lg border-2 border-slate-200 cursor-pointer hover:border-blue-400 transition-colors">
+                                <input type="checkbox" class="form-checkbox-custom text-blue-600" value="牆" name="inspectionPosition">
+                                <span class="font-medium text-slate-700">牆</span>
+                            </label>
+                        </div>
                     </div>
                     <div>
-                        <label for="inspectionResult" class="block text-sm font-medium text-gray-700">檢查結果 <span class="text-red-500">*</span></label>
-                         <select id="inspectionResult" class="w-full p-3 form-select shadow-sm mt-1 bg-white">
+                        <label for="inspectionDate" class="block text-sm font-medium text-slate-600 mb-1">檢查日期 <span class="text-red-500">*</span></label>
+                        <input type="date" id="inspectionDate" class="mt-1 w-full p-3 form-input">
+                    </div>
+                    <div>
+                        <label for="inspectionResult" class="block text-sm font-medium text-slate-600 mb-1">檢查結果 <span class="text-red-500">*</span></label>
+                         <select id="inspectionResult" class="w-full p-3 form-select">
                             <option value="合格">合格</option>
                             <option value="不合格">不合格</option>
                         </select>
@@ -132,104 +204,62 @@
                 </div>
                 
                 <!-- Work Report Fields (出工回報) -->
-                <div id="workReportFields" class="hidden space-y-4">
+                <div id="workReportFields" class="hidden space-y-4 bg-white p-4 sm:p-6 rounded-xl shadow-md">
+                    <h2 class="text-lg font-semibold text-slate-700 border-b-2 border-slate-200 pb-3 mb-4">每日出工回報</h2>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label for="reporterName" class="block text-sm font-medium text-gray-700">回報人 <span class="text-red-500">*</span></label>
-                            <input type="text" id="reporterName" class="mt-1 w-full p-3 form-input shadow-sm" placeholder="例如：興亞_美玲">
+                            <label for="reporterName" class="block text-sm font-medium text-slate-600 mb-1">回報人 <span class="text-red-500">*</span></label>
+                            <input type="text" id="reporterName" class="mt-1 w-full p-3 form-input" placeholder="例如：興亞_美玲">
                         </div>
                         <div>
-                           <label for="reportDate" class="block text-sm font-medium text-gray-700">回報日期 <span class="text-red-500">*</span></label>
-                           <input type="date" id="reportDate" class="mt-1 w-full p-3 form-input shadow-sm">
+                           <label for="reportDate" class="block text-sm font-medium text-slate-600 mb-1">回報日期 <span class="text-red-500">*</span></label>
+                           <input type="date" id="reportDate" class="mt-1 w-full p-3 form-input">
                         </div>
                     </div>
                      <div>
-                        <label for="projectName" class="block text-sm font-medium text-gray-700">案場名稱 <span class="text-red-500">*</span></label>
-                        <input type="text" id="projectName" class="mt-1 w-full p-3 form-input shadow-sm" placeholder="例如：惠民安居">
+                        <label for="projectName" class="block text-sm font-medium text-slate-600 mb-1">案場名稱 <span class="text-red-500">*</span></label>
+                        <input type="text" id="projectName" class="mt-1 w-full p-3 form-input" placeholder="例如：惠民安居">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">一、本日施作工項 <span class="text-red-500">*</span></label>
-                        <textarea id="todaysWork" rows="5" class="mt-1 w-full p-3 form-textarea shadow-sm" placeholder="請條列說明，例如：&#10;1. 鋼筋工程 - 9F柱牆鋼筋綁紮&#10;2. 模板工程 - 9樓單面模"></textarea>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">一、本日施作工項 <span class="text-red-500">*</span></label>
+                        <textarea id="todaysWork" rows="5" class="mt-1 w-full p-3 form-textarea" placeholder="請條列說明，例如：&#10;1. 鋼筋工程 - 9F柱牆鋼筋綁紮&#10;2. 模板工程 - 9樓單面模"></textarea>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">二、本日班工出工狀況 <span class="text-red-500">*</span></label>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">二、本日班工出工狀況 <span class="text-red-500">*</span></label>
                         <div id="workerCountContainer" class="space-y-2 mt-1">
                             <!-- Dynamic worker fields will be inserted here -->
                         </div>
-                        <button id="addWorkerBtn" type="button" class="mt-2 w-full text-sm bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300">
+                        <button id="addWorkerBtn" type="button" class="mt-2 w-full text-sm bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-lg hover:bg-slate-300 transition-colors">
                             <i class="fas fa-plus mr-2"></i>新增工種
                         </button>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">三、預計明天施作工項 <span class="text-red-500">*</span></label>
-                        <textarea id="tomorrowsWork" rows="5" class="mt-1 w-full p-3 form-textarea shadow-sm" placeholder="請條列說明，例如：&#10;1. 鋼筋工程 - 9F牆筋綁紮&#10;2. 模板工程 - 9F外模組裝"></textarea>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">三、預計明天施作工項 <span class="text-red-500">*</span></label>
+                        <textarea id="tomorrowsWork" rows="5" class="mt-1 w-full p-3 form-textarea" placeholder="請條列說明，例如：&#10;1. 鋼筋工程 - 9F牆筋綁紮&#10;2. 模板工程 - 9F外模組裝"></textarea>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">四、執行進度</label>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">四、執行進度</label>
                         <div class="grid grid-cols-2 gap-4 mt-1">
-                            <div><label for="cumulativeDays" class="text-xs text-gray-600">累計日曆天</label><input type="number" id="cumulativeDays" class="w-full p-2 form-input shadow-sm" placeholder="1015"></div>
-                            <div><label for="remainingDays" class="text-xs text-gray-600">剩餘日曆天</label><input type="number" id="remainingDays" class="w-full p-2 form-input shadow-sm" placeholder="724"></div>
-                            <div><label for="plannedProgress" class="text-xs text-gray-600">預計進度 (%)</label><input type="number" step="0.01" id="plannedProgress" class="w-full p-2 form-input shadow-sm" placeholder="31.67"></div>
-                            <div><label for="actualProgress" class="text-xs text-gray-600">實際進度 (%)</label><input type="number" step="0.01" id="actualProgress" class="w-full p-2 form-input shadow-sm" placeholder="31.73"></div>
+                            <div><label for="cumulativeDays" class="text-xs text-gray-500">累計日曆天</label><input type="number" id="cumulativeDays" class="w-full p-3 form-input" placeholder="1015"></div>
+                            <div><label for="remainingDays" class="text-xs text-gray-500">剩餘日曆天</label><input type="number" id="remainingDays" class="w-full p-3 form-input" placeholder="724"></div>
+                            <div><label for="plannedProgress" class="text-xs text-gray-500">預計進度 (%)</label><input type="number" step="0.01" id="plannedProgress" class="w-full p-3 form-input" placeholder="31.67"></div>
+                            <div><label for="actualProgress" class="text-xs text-gray-500">實際進度 (%)</label><input type="number" step="0.01" id="actualProgress" class="w-full p-3 form-input" placeholder="31.73"></div>
                         </div>
                     </div>
                 </div>
 
 
-                <!-- Test Fields (試驗通知) -->
-                <div id="testFields" class="hidden space-y-4">
-                    <!-- Test fields will be added here via JS -->
-                </div>
+                <!-- Other sections... -->
+                <div id="testFields" class="hidden space-y-4 bg-white p-4 sm:p-6 rounded-xl shadow-md"></div>
+                <div id="carFields" class="hidden space-y-4 bg-white p-4 sm:p-6 rounded-xl shadow-md"></div>
+                <div id="referralFields" class="hidden space-y-4 bg-white p-4 sm:p-6 rounded-xl shadow-md"></div>
 
-                <!-- Car Fields (公務車借用) -->
-                <div id="carFields" class="hidden space-y-4">
-                    <!-- Car fields will be added here via JS -->
-                </div>
-
-                <!-- Referral Fields (訊息轉知) -->
-                <div id="referralFields" class="hidden space-y-4">
-                     <div>
-                        <label for="referralSource" class="block text-sm font-medium text-gray-700">來自 <span class="text-red-500">*</span></label>
-                        <input type="text" id="referralSource" class="mt-1 w-full p-3 form-input shadow-sm" placeholder="例如：市府、營造廠">
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label for="referralDate" class="block text-sm font-medium text-gray-700">收到日期</label>
-                            <input type="date" id="referralDate" class="mt-1 w-full p-3 form-input shadow-sm">
-                        </div>
-                        <div>
-                            <label for="referralTime" class="block text-sm font-medium text-gray-700">收到時間</label>
-                            <input type="time" id="referralTime" class="mt-1 w-full p-3 form-input shadow-sm">
-                        </div>
-                    </div>
-                    <div>
-                        <label for="contactMethod" class="block text-sm font-medium text-gray-700">聯絡方式 <span class="text-red-500">*</span></label>
-                        <select id="contactMethod" class="w-full p-3 form-select shadow-sm mt-1 bg-white">
-                            <option value="LINE">LINE</option>
-                            <option value="MAIL">MAIL</option>
-                            <option value="公文">公文</option>
-                            <option value="親臨">親臨</option>
-                        </select>
-                    </div>
-                     <div>
-                        <label for="referralContent" class="block text-sm font-medium text-gray-700">內容 <span class="text-red-500">*</span></label>
-                        <div class="mt-1">
-                             <label for="fileUpload" class="w-full inline-flex items-center justify-center px-4 py-2 bg-gray-200 text-gray-700 rounded-md shadow-sm cursor-pointer hover:bg-gray-300 mb-2">
-                                <i class="fas fa-upload mr-2"></i>
-                                <span>上傳圖片辨識文字</span>
-                                <div id="ocrLoader" class="loader ml-2 hidden"></div>
-                            </label>
-                            <input type="file" id="fileUpload" class="hidden" accept="image/*">
-                            <textarea id="referralContent" rows="5" class="w-full p-3 form-textarea shadow-sm" placeholder="請輸入轉知的訊息內容，或上傳圖片自動辨識..."></textarea>
-                        </div>
-                    </div>
-                </div>
             </div>
 
-            <!-- Personnel Mention Selector -->
-            <div>
-                <label for="mentionPerson" class="block text-sm font-medium text-gray-700 mb-1">標註人員</label>
-                <select id="mentionPerson" class="w-full p-3 form-select shadow-sm bg-white">
+            <!-- Personnel Mention Card -->
+            <div class="bg-white p-4 sm:p-6 rounded-xl shadow-md">
+                 <label for="mentionPerson" class="block text-sm font-medium text-slate-600 mb-2">標註人員</label>
+                <select id="mentionPerson" class="w-full p-3 form-select text-base">
                     <option value="">不標註</option>
                     <option value="所長">所長</option>
                     <option value="吳淵文主任">吳淵文主任</option>
@@ -240,37 +270,38 @@
                     <option value="林義傑">林義傑</option>
                     <option value="品管陳煌奇">品管陳煌奇</option>
                 </select>
-                <p class="text-xs text-gray-500 mt-1">轉貼後，刪除人名可重新標註</p>
+                <p class="text-xs text-slate-500 mt-2">提示：轉貼後，刪除人名即可在通訊軟體中重新標註。</p>
             </div>
 
             <!-- Action Button -->
-            <div class="pt-4">
-                <button id="generateBtn" class="w-full bg-blue-500 text-white font-bold py-3 px-4 rounded-lg shadow-md hover:bg-blue-600 transition-transform transform hover:scale-105 active:scale-100">
+            <div class="pt-2">
+                <button id="generateBtn" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-4 px-4 rounded-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105 active:scale-100 duration-300">
                     <i class="fas fa-paper-plane mr-2"></i>產生訊息
                 </button>
             </div>
 
             <!-- Output Area -->
             <div id="outputContainer" class="hidden pt-4">
-                 <h3 class="text-lg font-semibold text-gray-700 mb-2">產生的訊息 (可直接編輯)：</h3>
-                <div id="output" class="p-4 output-area min-h-[150px]" contenteditable="true"></div>
-                <!-- Responsive Button Group using Flexbox -->
-                <div class="flex flex-col sm:flex-row gap-2 mt-4">
-                    <button id="copyBtn" class="w-full sm:flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg shadow-md flex items-center justify-center">
-                        <i class="fas fa-copy mr-2"></i><span>複製</span>
-                    </button>
-                    <button id="shareBtn" class="w-full sm:flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg shadow-md flex items-center justify-center">
-                        <i class="fas fa-share-alt mr-2"></i><span>分享</span>
-                    </button>
-                    <button id="calendarBtn" class="w-full sm:flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg shadow-md flex items-center justify-center">
-                        <i class="fas fa-calendar-plus mr-2"></i><span>新增至日曆</span>
-                    </button>
+                <div class="bg-white p-4 sm:p-6 rounded-xl shadow-md">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-3 border-b-2 border-slate-200 pb-3">產生的訊息 (可直接編輯)</h3>
+                    <div id="output" class="p-4 output-area min-h-[200px]" contenteditable="true"></div>
+                    <div class="flex flex-col sm:flex-row gap-3 mt-4">
+                        <button id="copyBtn" class="w-full sm:flex-1 bg-slate-700 hover:bg-slate-800 text-white font-bold py-3 px-4 rounded-lg shadow-md flex items-center justify-center transition-transform transform active:scale-95">
+                            <i class="fas fa-copy mr-2"></i><span>複製</span>
+                        </button>
+                        <button id="shareBtn" class="w-full sm:flex-1 bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-4 rounded-lg shadow-md flex items-center justify-center transition-transform transform active:scale-95">
+                            <i class="fas fa-share-alt mr-2"></i><span>分享</span>
+                        </button>
+                        <button id="calendarBtn" class="w-full sm:flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-4 rounded-lg shadow-md flex items-center justify-center transition-transform transform active:scale-95">
+                            <i class="fas fa-calendar-plus mr-2"></i><span>新增至日曆</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </main>
         
         <!-- Toast Notification -->
-        <div id="toast" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-md shadow-lg z-50 transition-opacity duration-300"></div>
+        <div id="toast" class="hidden fixed bottom-5 left-1/2 bg-gray-800 text-white px-5 py-3 rounded-lg shadow-xl z-50 transition-all duration-300" style="transform: translateX(-50%);"></div>
     </div>
 
     <script>
@@ -297,6 +328,7 @@
                 inspectionType: document.getElementById('inspectionType'),
                 inspectionProjectName: document.getElementById('inspectionProjectName'),
                 inspectionLocation: document.getElementById('inspectionLocation'),
+                inspectionPositionCheckboxes: document.getElementById('inspectionPositionCheckboxes'),
                 inspectionDate: document.getElementById('inspectionDate'),
                 inspectionResult: document.getElementById('inspectionResult'),
 
@@ -312,15 +344,7 @@
                 remainingDays: document.getElementById('remainingDays'),
                 plannedProgress: document.getElementById('plannedProgress'),
                 actualProgress: document.getElementById('actualProgress'),
-
-                // Referral Fields
-                referralSource: document.getElementById('referralSource'),
-                referralDate: document.getElementById('referralDate'),
-                referralTime: document.getElementById('referralTime'),
-                contactMethod: document.getElementById('contactMethod'),
-                fileUpload: document.getElementById('fileUpload'),
-                ocrLoader: document.getElementById('ocrLoader'),
-                referralContent: document.getElementById('referralContent'),
+                
                 mentionPerson: document.getElementById('mentionPerson'),
                 
                 inputs: [],
@@ -329,23 +353,35 @@
             // --- UI & Utility Functions ---
             const ui = {
                 showToast: (message, isError = false) => {
-                    dom.toast.textContent = message;
-                    dom.toast.className = `fixed bottom-5 left-1/2 -translate-x-1/2 text-white px-4 py-2 rounded-md shadow-lg z-50 transition-opacity duration-300 ${isError ? 'bg-red-600' : 'bg-gray-800'}`;
-                    dom.toast.classList.remove('hidden', 'opacity-0');
-                    dom.toast.classList.add('opacity-100');
+                    const toast = dom.toast;
+                    toast.textContent = message;
+                    toast.className = `fixed bottom-5 left-1/2 text-white px-5 py-3 rounded-lg shadow-xl z-50 transition-all duration-300 ${isError ? 'bg-red-600' : 'bg-slate-800'}`;
+                    toast.classList.remove('hidden', 'toast-exit', 'toast-exit-active');
+                    toast.classList.add('toast-enter');
+                    requestAnimationFrame(() => {
+                        toast.classList.remove('toast-enter');
+                        toast.classList.add('toast-enter-active');
+                    });
+
                     setTimeout(() => {
-                        dom.toast.classList.remove('opacity-100');
-                        dom.toast.classList.add('opacity-0');
-                        setTimeout(() => dom.toast.classList.add('hidden'), 300);
+                        toast.classList.remove('toast-enter-active');
+                        toast.classList.add('toast-exit');
+                         requestAnimationFrame(() => {
+                            toast.classList.add('toast-exit-active');
+                        });
+                        setTimeout(() => toast.classList.add('hidden'), 300);
                     }, 3000);
                 },
                 updateFormVisibility: () => {
                     const type = dom.messageType.value;
-                    dom.inspectionFields.classList.toggle('hidden', type !== 'inspection');
-                    dom.workReportFields.classList.toggle('hidden', type !== 'workReport');
-                    dom.testFields.classList.toggle('hidden', type !== 'test');
-                    dom.carFields.classList.toggle('hidden', type !== 'car');
-                    dom.referralFields.classList.toggle('hidden', type !== 'referral');
+                    Object.values(dom.fieldsContainer.children).forEach(el => {
+                        el.classList.add('hidden');
+                    });
+                    
+                    const activeField = document.getElementById(type + 'Fields');
+                    if (activeField) {
+                        activeField.classList.remove('hidden');
+                    }
                     dom.outputContainer.classList.add('hidden');
                 },
                  formatDate: (dateStr) => {
@@ -378,6 +414,13 @@
                            currentState[input.id] = input.value;
                         }
                     });
+                    // Save checkbox states for inspection
+                    const inspectionPositions = {};
+                    dom.inspectionPositionCheckboxes.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                        inspectionPositions[cb.value] = cb.checked;
+                    });
+                    currentState['inspectionPositions'] = inspectionPositions;
+
                     // Save dynamic worker data
                     const workerData = [];
                     dom.workerCountContainer.querySelectorAll('.worker-row').forEach(row => {
@@ -397,9 +440,17 @@
                                 input.value = savedState[input.id];
                             }
                         });
-                        // Load dynamic worker data
-                        if(savedState.workerData){
-                            savedState.workerData.forEach(data => workReport.addWorkerRow(data.type, data.count));
+                         // Load checkbox states for inspection
+                        if (savedState.inspectionPositions) {
+                            dom.inspectionPositionCheckboxes.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                                if(savedState.inspectionPositions[cb.value] !== undefined) {
+                                    cb.checked = savedState.inspectionPositions[cb.value];
+                                }
+                            });
+                        }
+                        if(savedState.workerData && savedState.workerData.length > 0){
+                           dom.workerCountContainer.innerHTML = ''; // Clear default rows before loading
+                           savedState.workerData.forEach(data => workReport.addWorkerRow(data.type, data.count));
                         }
                     }
                 },
@@ -413,8 +464,11 @@
                             input.value = '';
                         }
                     });
+                    // Clear checkboxes
+                    dom.inspectionPositionCheckboxes.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+                    // Clear and reset worker rows
                     dom.workerCountContainer.innerHTML = '';
-                    workReport.addWorkerRow(); // Add one empty row back
+                    workReport.addWorkerRow(); 
                     const today = new Date();
                     const todayString = today.toISOString().slice(0, 10);
                     const timeString = today.toTimeString().slice(0, 5);
@@ -429,15 +483,17 @@
             const handleFileUpload = async (event) => {
                 const file = event.target.files[0];
                 if (!file) return;
+                const ocrLabel = event.target.previousElementSibling;
+                const ocrLoader = ocrLabel.querySelector('.loader');
+                const referralContent = document.getElementById('referralContent');
 
-                dom.ocrLoader.classList.remove('hidden');
+                ocrLoader.classList.remove('hidden');
                 ui.showToast('圖片辨識中，請稍候...');
-
                 try {
                     const worker = await Tesseract.createWorker('eng+chi_tra');
                     const { data: { text } } = await worker.recognize(file);
-                    const existingText = dom.referralContent.value;
-                    dom.referralContent.value = existingText ? `${existingText}\n\n--- (辨識內容) ---\n${text}` : text;
+                    const existingText = referralContent.value;
+                    referralContent.value = existingText ? `${existingText}\n\n--- (辨識內容) ---\n${text}` : text;
                     await worker.terminate();
                     ui.showToast('文字辨識成功！');
                     state.save();
@@ -445,7 +501,7 @@
                     console.error('OCR Error:', error);
                     ui.showToast('文字辨識失敗，請重試。', true);
                 } finally {
-                    dom.ocrLoader.classList.add('hidden');
+                    ocrLoader.classList.add('hidden');
                     event.target.value = ''; 
                 }
             };
@@ -456,12 +512,11 @@
                     const row = document.createElement('div');
                     row.className = 'worker-row flex items-center gap-2';
                     row.innerHTML = `
-                        <input type="text" class="worker-type w-1/2 p-2 form-input shadow-sm" placeholder="工種 (例:鋼筋工)" value="${type}">
-                        <input type="number" class="worker-count w-1/2 p-2 form-input shadow-sm" placeholder="人數 (工)" value="${count}">
-                        <button type="button" class="remove-worker-btn text-red-500 hover:text-red-700 p-2"><i class="fas fa-trash-alt"></i></button>
+                        <input type="text" class="worker-type w-1/2 p-3 form-input" placeholder="工種 (例:鋼筋工)" value="${type}">
+                        <input type="number" class="worker-count w-1/2 p-3 form-input" placeholder="人數 (工)" value="${count}">
+                        <button type="button" class="remove-worker-btn text-slate-400 hover:text-red-500 p-2 rounded-full transition-colors"><i class="fas fa-trash-alt"></i></button>
                     `;
                     dom.workerCountContainer.appendChild(row);
-                    // Re-collect inputs for state saving
                     dom.inputs = Array.from(document.querySelectorAll('#fieldsContainer input, #fieldsContainer select, #fieldsContainer textarea, #mentionPerson'));
                     dom.inputs.forEach(input => { input.addEventListener('input', state.save); });
                     row.querySelector('.remove-worker-btn').addEventListener('click', () => {
@@ -494,18 +549,25 @@
 
                     switch (type) {
                         case 'inspection':
-                            // ... inspection logic ...
+                            const selectedPositions = Array.from(dom.inspectionPositionCheckboxes.querySelectorAll('input:checked')).map(cb => cb.value).join('、');
                             const inspData = {
                                 type: dom.inspectionType.value, projectName: dom.inspectionProjectName.value.trim(), location: dom.inspectionLocation.value.trim(),
-                                date: dom.inspectionDate.value, result: dom.inspectionResult.value,
+                                positions: selectedPositions, date: dom.inspectionDate.value, result: dom.inspectionResult.value,
                             };
-                            if (!inspData.projectName || !inspData.location || !inspData.date) { isValid = false; break; }
+                            if (!inspData.projectName || !inspData.location || !inspData.date || !inspData.positions) { isValid = false; break; }
                             title = '本日自檢/查驗進度';
-                            message = `[${title}]\n檢查類別：${inspData.type}\n分項名稱：${inspData.projectName}\n檢查樓層位置：${inspData.location}\n檢查日期：${ui.formatDate(inspData.date)}\n檢查結果：${inspData.result}`;
+                            message = `[${title}]\n`;
+                            message += `檢查類別：${inspData.type}\n`;
+                            message += `分項名稱：${inspData.projectName}\n`;
+                            message += `檢查樓層：${inspData.location}\n`;
+                            message += `檢查位置：${inspData.positions}\n`;
+                            message += `檢查日期：${ui.formatDate(inspData.date)}\n`;
+                            message += `檢查結果：${inspData.result}`;
                             dom.calendarBtn.classList.add('hidden'); dom.shareBtn.classList.remove('hidden');
                             break;
                         
                         case 'workReport':
+                            // Work Report Logic...
                             const reportData = {
                                 reporter: dom.reporterName.value.trim(), date: dom.reportDate.value, project: dom.projectName.value.trim(),
                                 today: dom.todaysWork.value.trim(), tomorrow: dom.tomorrowsWork.value.trim(),
@@ -518,12 +580,9 @@
                             message = `${reportData.reporter} ${ui.formatDate(reportData.date).replace(/\//g, '')} ${reportData.project}\n\n`;
                             message += `一、本日施作工項\n${reportData.today}\n\n`;
                             message += `二、本日班工出工狀況\n`;
-                            reportData.workerInfo.workers.forEach((w, i) => {
-                                message += `${i + 1}. ${w.type} : ${w.count} 工\n`;
-                            });
+                            reportData.workerInfo.workers.forEach((w, i) => { message += `${i + 1}. ${w.type} : ${w.count} 工\n`; });
                             message += `總出工數 : ${reportData.workerInfo.total} 工\n\n`;
                             message += `三、預計明天施作工項\n${reportData.tomorrow}\n\n`;
-                            
                             if(reportData.cumulative || reportData.remaining || reportData.planned || reportData.actual){
                                 message += `四、執行進度\n`;
                                 if(reportData.cumulative) message += `1. 累計 : ${reportData.cumulative} 日曆天\n`;
@@ -535,7 +594,7 @@
                             break;
 
                         case 'test':
-                            // ... test logic ...
+                            // Test Logic...
                             const testData = {
                                 date: dom.testDate.value, time: dom.testTime.value, sampling: dom.samplingLocation.value.trim(),
                                 age: dom.materialAge.value.trim(), location: dom.testLocation.value.trim(), attend: dom.willAttend.value
@@ -548,7 +607,7 @@
                             break;
 
                         case 'car':
-                            // ... car logic ...
+                            // Car Logic...
                             const carData = {
                                 startDate: dom.carStartDate.value, startTime: dom.carStartTime.value, endDate: dom.carEndDate.value,
                                 endTime: dom.carEndTime.value, destination: dom.carDestination.value.trim(), user: dom.borrower.value.trim(),
@@ -561,7 +620,7 @@
                             break;
                         
                         case 'referral':
-                            // ... referral logic ...
+                            // Referral Logic...
                             const referralData = {
                                 source: dom.referralSource.value.trim(), date: dom.referralDate.value, time: dom.referralTime.value,
                                 method: dom.contactMethod.value, content: dom.referralContent.value.trim()
@@ -604,74 +663,108 @@
                     }
                 },
                 addToCalendar: () => {
-                    // ... addToCalendar logic ...
+                    // addToCalendar Logic...
                 }
             };
             
             // --- Dynamic Field Generation ---
             function createDynamicFields() {
                 // Test Fields HTML
-                dom.testFields.innerHTML = `
+                dom.testFields.innerHTML = `<h2 class="text-lg font-semibold text-slate-700 border-b-2 border-slate-200 pb-3 mb-4">試驗通知</h2>
                     <div class="grid grid-cols-2 gap-4">
-                        <div><label for="testDate" class="block text-sm font-medium text-gray-700">試驗日期 <span class="text-red-500">*</span></label><input type="date" id="testDate" class="mt-1 w-full p-3 form-input shadow-sm"></div>
-                        <div><label for="testTime" class="block text-sm font-medium text-gray-700">試驗時間 <span class="text-red-500">*</span></label><input type="time" id="testTime" class="mt-1 w-full p-3 form-input shadow-sm"></div>
+                        <div><label for="testDate" class="block text-sm font-medium text-slate-600 mb-1">試驗日期 <span class="text-red-500">*</span></label><input type="date" id="testDate" class="mt-1 w-full p-3 form-input"></div>
+                        <div><label for="testTime" class="block text-sm font-medium text-slate-600 mb-1">試驗時間 <span class="text-red-500">*</span></label><input type="time" id="testTime" class="mt-1 w-full p-3 form-input"></div>
                     </div>
-                    <div><label for="samplingLocation" class="block text-sm font-medium text-gray-700">取樣位置 <span class="text-red-500">*</span></label><input type="text" id="samplingLocation" class="mt-1 w-full p-3 form-input shadow-sm" placeholder="例如：A棟一樓樑柱"></div>
-                    <div><label for="materialAge" class="block text-sm font-medium text-gray-700">材齡 <span class="text-red-500">*</span></label><input type="text" id="materialAge" class="mt-1 w-full p-3 form-input shadow-sm" placeholder="例如：7天、28天"></div>
-                    <div><label for="testLocation" class="block text-sm font-medium text-gray-700">試驗地點 <span class="text-red-500">*</span></label><input type="text" id="testLocation" class="mt-1 w-full p-3 form-input shadow-sm" placeholder="例如：XX實驗室"></div>
-                    <div><label for="willAttend" class="block text-sm font-medium text-gray-700">是否會驗 <span class="text-red-500">*</span></label><select id="willAttend" class="w-full p-3 form-select shadow-sm mt-1 bg-white"><option value="是">是</option><option value="否">否</option></select></div>`;
+                    <div><label for="samplingLocation" class="block text-sm font-medium text-slate-600 mb-1">取樣位置 <span class="text-red-500">*</span></label><input type="text" id="samplingLocation" class="mt-1 w-full p-3 form-input" placeholder="例如：A棟一樓樑柱"></div>
+                    <div><label for="materialAge" class="block text-sm font-medium text-slate-600 mb-1">材齡 <span class="text-red-500">*</span></label><input type="text" id="materialAge" class="mt-1 w-full p-3 form-input" placeholder="例如：7天、28天"></div>
+                    <div><label for="testLocation" class="block text-sm font-medium text-slate-600 mb-1">試驗地點 <span class="text-red-500">*</span></label><input type="text" id="testLocation" class="mt-1 w-full p-3 form-input" placeholder="例如：XX實驗室"></div>
+                    <div><label for="willAttend" class="block text-sm font-medium text-slate-600 mb-1">是否會驗 <span class="text-red-500">*</span></label><select id="willAttend" class="w-full p-3 form-select mt-1"><option value="是">是</option><option value="否">否</option></select></div>`;
 
                 // Car Fields HTML
-                dom.carFields.innerHTML = `
+                dom.carFields.innerHTML = `<h2 class="text-lg font-semibold text-slate-700 border-b-2 border-slate-200 pb-3 mb-4">公務車借用</h2>
                     <div class="grid grid-cols-2 gap-4">
-                        <div><label for="carStartDate" class="block text-sm font-medium text-gray-700">借用日期 <span class="text-red-500">*</span></label><input type="date" id="carStartDate" class="mt-1 w-full p-3 form-input shadow-sm"></div>
-                        <div><label for="carStartTime" class="block text-sm font-medium text-gray-700">借用時間 <span class="text-red-500">*</span></label><input type="time" id="carStartTime" class="mt-1 w-full p-3 form-input shadow-sm"></div>
+                        <div><label for="carStartDate" class="block text-sm font-medium text-slate-600 mb-1">借用日期 <span class="text-red-500">*</span></label><input type="date" id="carStartDate" class="mt-1 w-full p-3 form-input"></div>
+                        <div><label for="carStartTime" class="block text-sm font-medium text-slate-600 mb-1">借用時間 <span class="text-red-500">*</span></label><input type="time" id="carStartTime" class="mt-1 w-full p-3 form-input"></div>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
-                        <div><label for="carEndDate" class="block text-sm font-medium text-gray-700">歸還日期 <span class="text-red-500">*</span></label><input type="date" id="carEndDate" class="mt-1 w-full p-3 form-input shadow-sm"></div>
-                        <div><label for="carEndTime" class="block text-sm font-medium text-gray-700">歸還時間 <span class="text-red-500">*</span></label><input type="time" id="carEndTime" class="mt-1 w-full p-3 form-input shadow-sm"></div>
+                        <div><label for="carEndDate" class="block text-sm font-medium text-slate-600 mb-1">歸還日期 <span class="text-red-500">*</span></label><input type="date" id="carEndDate" class="mt-1 w-full p-3 form-input"></div>
+                        <div><label for="carEndTime" class="block text-sm font-medium text-slate-600 mb-1">歸還時間 <span class="text-red-500">*</span></label><input type="time" id="carEndTime" class="mt-1 w-full p-3 form-input"></div>
                     </div>
-                    <div><label for="carDestination" class="block text-sm font-medium text-gray-700">目的地 <span class="text-red-500">*</span></label><input type="text" id="carDestination" class="mt-1 w-full p-3 form-input shadow-sm" placeholder="例如：市政府"></div>
-                    <div><label for="borrower" class="block text-sm font-medium text-gray-700">借用人 <span class="text-red-500">*</span></label><input type="text" id="borrower" class="mt-1 w-full p-3 form-input shadow-sm" placeholder="請輸入姓名"></div>`;
+                    <div><label for="carDestination" class="block text-sm font-medium text-slate-600 mb-1">目的地 <span class="text-red-500">*</span></label><input type="text" id="carDestination" class="mt-1 w-full p-3 form-input" placeholder="例如：市政府"></div>
+                    <div><label for="borrower" class="block text-sm font-medium text-slate-600 mb-1">借用人 <span class="text-red-500">*</span></label><input type="text" id="borrower" class="mt-1 w-full p-3 form-input" placeholder="請輸入姓名"></div>`;
                 
-                // Add references for dynamically created elements to the dom object
-                dom.testDate = document.getElementById('testDate');
-                dom.testTime = document.getElementById('testTime');
-                dom.samplingLocation = document.getElementById('samplingLocation');
-                dom.materialAge = document.getElementById('materialAge');
-                dom.testLocation = document.getElementById('testLocation');
-                dom.willAttend = document.getElementById('willAttend');
-                dom.carStartDate = document.getElementById('carStartDate');
-                dom.carStartTime = document.getElementById('carStartTime');
-                dom.carEndDate = document.getElementById('carEndDate');
-                dom.carEndTime = document.getElementById('carEndTime');
-                dom.carDestination = document.getElementById('carDestination');
-                dom.borrower = document.getElementById('borrower');
+                 // Referral Fields HTML
+                dom.referralFields.innerHTML = `<h2 class="text-lg font-semibold text-slate-700 border-b-2 border-slate-200 pb-3 mb-4">訊息轉知</h2>
+                    <div>
+                        <label for="referralSource" class="block text-sm font-medium text-slate-600 mb-1">來自 <span class="text-red-500">*</span></label>
+                        <input type="text" id="referralSource" class="mt-1 w-full p-3 form-input" placeholder="例如：市府、營造廠">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="referralDate" class="block text-sm font-medium text-slate-600 mb-1">收到日期</label>
+                            <input type="date" id="referralDate" class="mt-1 w-full p-3 form-input">
+                        </div>
+                        <div>
+                            <label for="referralTime" class="block text-sm font-medium text-slate-600 mb-1">收到時間</label>
+                            <input type="time" id="referralTime" class="mt-1 w-full p-3 form-input">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="contactMethod" class="block text-sm font-medium text-slate-600 mb-1">聯絡方式 <span class="text-red-500">*</span></label>
+                        <select id="contactMethod" class="w-full p-3 form-select mt-1">
+                            <option value="LINE">LINE</option>
+                            <option value="MAIL">MAIL</option>
+                            <option value="公文">公文</option>
+                            <option value="親臨">親臨</option>
+                        </select>
+                    </div>
+                     <div>
+                        <label for="referralContent" class="block text-sm font-medium text-slate-600 mb-1">內容 <span class="text-red-500">*</span></label>
+                        <div class="mt-1">
+                             <label class="w-full inline-flex items-center justify-center px-4 py-3 bg-slate-200 text-slate-700 font-semibold rounded-lg shadow-sm cursor-pointer hover:bg-slate-300 mb-2 transition-colors">
+                                <i class="fas fa-upload mr-2"></i>
+                                <span>上傳圖片辨識文字</span>
+                                <div class="loader ml-2 hidden"></div>
+                            </label>
+                            <input type="file" id="fileUpload" class="hidden" accept="image/*">
+                            <textarea id="referralContent" rows="5" class="w-full p-3 form-textarea" placeholder="請輸入轉知的訊息內容，或上傳圖片自動辨識..."></textarea>
+                        </div>
+                    </div>`;
 
-                // Re-collect all inputs after creation
+                dom.testDate = document.getElementById('testDate'); dom.testTime = document.getElementById('testTime');
+                dom.samplingLocation = document.getElementById('samplingLocation'); dom.materialAge = document.getElementById('materialAge');
+                dom.testLocation = document.getElementById('testLocation'); dom.willAttend = document.getElementById('willAttend');
+                dom.carStartDate = document.getElementById('carStartDate'); dom.carStartTime = document.getElementById('carStartTime');
+                dom.carEndDate = document.getElementById('carEndDate'); dom.carEndTime = document.getElementById('carEndTime');
+                dom.carDestination = document.getElementById('carDestination'); dom.borrower = document.getElementById('borrower');
+                dom.referralSource = document.getElementById('referralSource'); dom.referralDate = document.getElementById('referralDate');
+                dom.referralTime = document.getElementById('referralTime'); dom.contactMethod = document.getElementById('contactMethod');
+                dom.fileUpload = document.getElementById('fileUpload');
+                
                 dom.inputs = Array.from(document.querySelectorAll('#fieldsContainer input, #fieldsContainer select, #fieldsContainer textarea, #mentionPerson'));
             }
 
             // --- Initialization ---
             function init() {
                 createDynamicFields();
-                workReport.addWorkerRow('鋼筋工', '15');
-                workReport.addWorkerRow('模板工', '50');
-                workReport.addWorkerRow('泥水工', '3');
-                workReport.addWorkerRow('水電工', '10');
-                workReport.addWorkerRow('普通工', '3');
+                 // Add default worker rows, but only if no saved data exists
+                const savedState = JSON.parse(localStorage.getItem(APP_STATE_KEY));
+                if (!savedState || !savedState.workerData || savedState.workerData.length === 0) {
+                    workReport.addWorkerRow('鋼筋工', '15'); workReport.addWorkerRow('模板工', '50');
+                    workReport.addWorkerRow('泥水工', '3'); workReport.addWorkerRow('水電工', '10');
+                    workReport.addWorkerRow('普通工', '3');
+                }
 
                 const today = new Date();
                 const todayString = today.toISOString().slice(0, 10);
                 const timeString = today.toTimeString().slice(0, 5);
-                document.querySelectorAll('input[type="date"]').forEach(el => el.value = todayString);
-                document.querySelectorAll('input[type="time"]').forEach(el => el.value = timeString);
+                document.querySelectorAll('input[type="date"]').forEach(el => { if(!el.value) el.value = todayString });
+                document.querySelectorAll('input[type="time"]').forEach(el => { if(!el.value) el.value = timeString });
 
                 state.load();
                 ui.updateFormVisibility();
                 if (!navigator.share) { dom.shareBtn.classList.add('hidden'); }
 
-                // Add event listeners
                 dom.messageType.addEventListener('change', ui.updateFormVisibility);
                 dom.generateBtn.addEventListener('click', handlers.generateMessage);
                 dom.clearBtn.addEventListener('click', state.clear);
@@ -680,6 +773,7 @@
                 dom.calendarBtn.addEventListener('click', handlers.addToCalendar);
                 dom.fileUpload.addEventListener('change', handleFileUpload);
                 dom.addWorkerBtn.addEventListener('click', () => workReport.addWorkerRow());
+                dom.inspectionPositionCheckboxes.addEventListener('change', state.save);
                 dom.inputs.forEach(input => { input.addEventListener('input', state.save); });
             }
 
@@ -688,4 +782,3 @@
     </script>
 </body>
 </html>
-
