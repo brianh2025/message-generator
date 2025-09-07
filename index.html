@@ -127,7 +127,7 @@
 
     <div class="max-w-lg mx-auto bg-slate-100 min-h-screen">
         <!-- Header -->
-        <header class="bg-gradient-to-r from-slate-800 to-slate-600 text-white p-5 text-center sticky top-0 z-20 shadow-lg flex justify-between items-center">
+        <header class="bg-gradient-to-r from-slate-800 to-slate-600 text-white p-4 text-center sticky top-0 z-20 shadow-lg flex justify-between items-center">
             <h1 id="headerTitle" class="text-xl font-bold tracking-wider">工務訊息產生器 Pro</h1>
             <button id="clearBtn" title="清除所有欄位" class="text-white hover:bg-slate-700/50 p-2 rounded-full transition-colors duration-200">
                 <i class="fas fa-broom fa-lg"></i>
@@ -135,11 +135,11 @@
         </header>
 
         <!-- Content Area -->
-        <main class="content p-3 sm:p-4 space-y-5 pb-24 no-scrollbar">
+        <main class="content p-3 space-y-4 pb-24 no-scrollbar">
             <!-- Message Type Selector Card -->
-            <div class="bg-white p-4 sm:p-6 rounded-xl shadow-md">
+            <div class="bg-white p-4 rounded-xl shadow-md">
                  <label for="messageType" class="block text-sm font-medium text-slate-600 mb-2">訊息類型</label>
-                <select id="messageType" class="w-full p-3 form-select text-base">
+                <select id="messageType" class="w-full p-2.5 form-select text-base">
                     <option value="inspection">本日自檢/查驗進度</option>
                     <option value="workReport">出工回報</option>
                     <option value="test">試驗通知</option>
@@ -150,41 +150,41 @@
             
 
             <!-- Fields Container -->
-            <div id="fieldsContainer" class="space-y-5">
+            <div id="fieldsContainer" class="space-y-4">
                 <!-- Inspection Fields (本日自檢/查驗進度) -->
-                <div id="inspectionFields" class="hidden space-y-4 bg-white p-4 sm:p-6 rounded-xl shadow-md">
-                    <h2 class="text-lg font-semibold text-slate-700 border-b-2 border-slate-200 pb-3 mb-4">查驗進度回報</h2>
+                <div id="inspectionFields" class="hidden space-y-3 bg-white p-4 rounded-xl shadow-md">
+                    <h2 class="text-lg font-semibold text-slate-700 border-b-2 border-slate-200 pb-2 mb-3">查驗進度回報</h2>
                     <div>
                         <label for="inspectionType" class="block text-sm font-medium text-slate-600 mb-1">檢查類別 <span class="text-red-500">*</span></label>
-                         <select id="inspectionType" class="w-full p-3 form-select">
+                         <select id="inspectionType" class="w-full p-2.5 form-select">
                             <option value="自檢">自檢</option>
                             <option value="監造查驗">監造查驗</option>
                         </select>
                     </div>
                     <div>
                         <label for="inspectionProjectName" class="block text-sm font-medium text-slate-600 mb-1">分項名稱 <span class="text-red-500">*</span></label>
-                        <input type="text" id="inspectionProjectName" class="mt-1 w-full p-3 form-input" placeholder="例如：模板組立、鋼筋綁紮">
+                        <input type="text" id="inspectionProjectName" class="mt-1 w-full p-2.5 form-input" placeholder="例如：模板組立、鋼筋綁紮">
                     </div>
                     <div>
                         <label for="inspectionLocation" class="block text-sm font-medium text-slate-600 mb-1">樓層 <span class="text-red-500">*</span></label>
-                        <input type="text" id="inspectionLocation" class="mt-1 w-full p-3 form-input" placeholder="例如：R1F、A棟2F">
+                        <input type="text" id="inspectionLocation" class="mt-1 w-full p-2.5 form-input" placeholder="例如：R1F、A棟2F">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-600 mb-1">檢查位置 <span class="text-red-500">*</span></label>
-                        <div id="inspectionPositionCheckboxes" class="mt-2 grid grid-cols-2 sm:grid-cols-4 gap-3">
-                            <label class="flex items-center space-x-3 p-3 bg-slate-50 rounded-lg border-2 border-slate-200 cursor-pointer hover:border-blue-400 transition-colors">
+                        <div id="inspectionPositionCheckboxes" class="mt-2 grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            <label class="flex items-center space-x-2 p-2 bg-slate-50 rounded-lg border-2 border-slate-200 cursor-pointer hover:border-blue-400 transition-colors">
                                 <input type="checkbox" class="form-checkbox-custom text-blue-600" value="柱" name="inspectionPosition">
                                 <span class="font-medium text-slate-700">柱</span>
                             </label>
-                            <label class="flex items-center space-x-3 p-3 bg-slate-50 rounded-lg border-2 border-slate-200 cursor-pointer hover:border-blue-400 transition-colors">
+                            <label class="flex items-center space-x-2 p-2 bg-slate-50 rounded-lg border-2 border-slate-200 cursor-pointer hover:border-blue-400 transition-colors">
                                 <input type="checkbox" class="form-checkbox-custom text-blue-600" value="梁" name="inspectionPosition">
                                 <span class="font-medium text-slate-700">梁</span>
                             </label>
-                             <label class="flex items-center space-x-3 p-3 bg-slate-50 rounded-lg border-2 border-slate-200 cursor-pointer hover:border-blue-400 transition-colors">
+                             <label class="flex items-center space-x-2 p-2 bg-slate-50 rounded-lg border-2 border-slate-200 cursor-pointer hover:border-blue-400 transition-colors">
                                 <input type="checkbox" class="form-checkbox-custom text-blue-600" value="版" name="inspectionPosition">
                                 <span class="font-medium text-slate-700">版</span>
                             </label>
-                             <label class="flex items-center space-x-3 p-3 bg-slate-50 rounded-lg border-2 border-slate-200 cursor-pointer hover:border-blue-400 transition-colors">
+                             <label class="flex items-center space-x-2 p-2 bg-slate-50 rounded-lg border-2 border-slate-200 cursor-pointer hover:border-blue-400 transition-colors">
                                 <input type="checkbox" class="form-checkbox-custom text-blue-600" value="牆" name="inspectionPosition">
                                 <span class="font-medium text-slate-700">牆</span>
                             </label>
@@ -192,11 +192,11 @@
                     </div>
                     <div>
                         <label for="inspectionDate" class="block text-sm font-medium text-slate-600 mb-1">檢查日期 <span class="text-red-500">*</span></label>
-                        <input type="date" id="inspectionDate" class="mt-1 w-full p-3 form-input">
+                        <input type="date" id="inspectionDate" class="mt-1 w-full p-2.5 form-input">
                     </div>
                     <div>
                         <label for="inspectionResult" class="block text-sm font-medium text-slate-600 mb-1">檢查結果 <span class="text-red-500">*</span></label>
-                         <select id="inspectionResult" class="w-full p-3 form-select">
+                         <select id="inspectionResult" class="w-full p-2.5 form-select">
                             <option value="合格">合格</option>
                             <option value="不合格">不合格</option>
                         </select>
@@ -204,62 +204,62 @@
                 </div>
                 
                 <!-- Work Report Fields (出工回報) -->
-                <div id="workReportFields" class="hidden space-y-4 bg-white p-4 sm:p-6 rounded-xl shadow-md">
-                    <h2 class="text-lg font-semibold text-slate-700 border-b-2 border-slate-200 pb-3 mb-4">每日出工回報</h2>
-                    <div class="grid grid-cols-2 gap-4">
+                <div id="workReportFields" class="hidden space-y-3 bg-white p-4 rounded-xl shadow-md">
+                    <h2 class="text-lg font-semibold text-slate-700 border-b-2 border-slate-200 pb-2 mb-3">每日出工回報</h2>
+                    <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label for="reporterName" class="block text-sm font-medium text-slate-600 mb-1">回報人 <span class="text-red-500">*</span></label>
-                            <input type="text" id="reporterName" class="mt-1 w-full p-3 form-input" placeholder="例如：興亞_美玲">
+                            <input type="text" id="reporterName" class="mt-1 w-full p-2.5 form-input" placeholder="例如：興亞_美玲">
                         </div>
                         <div>
                            <label for="reportDate" class="block text-sm font-medium text-slate-600 mb-1">回報日期 <span class="text-red-500">*</span></label>
-                           <input type="date" id="reportDate" class="mt-1 w-full p-3 form-input">
+                           <input type="date" id="reportDate" class="mt-1 w-full p-2.5 form-input">
                         </div>
                     </div>
                      <div>
                         <label for="projectName" class="block text-sm font-medium text-slate-600 mb-1">案場名稱 <span class="text-red-500">*</span></label>
-                        <input type="text" id="projectName" class="mt-1 w-full p-3 form-input" placeholder="例如：惠民安居">
+                        <input type="text" id="projectName" class="mt-1 w-full p-2.5 form-input" placeholder="例如：惠民安居">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-600 mb-1">一、本日施作工項 <span class="text-red-500">*</span></label>
-                        <textarea id="todaysWork" rows="5" class="mt-1 w-full p-3 form-textarea" placeholder="請條列說明，例如：&#10;1. 鋼筋工程 - 9F柱牆鋼筋綁紮&#10;2. 模板工程 - 9樓單面模"></textarea>
+                        <textarea id="todaysWork" rows="4" class="mt-1 w-full p-2.5 form-textarea" placeholder="請條列說明..."></textarea>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-600 mb-1">二、本日班工出工狀況 <span class="text-red-500">*</span></label>
                         <div id="workerCountContainer" class="space-y-2 mt-1">
                             <!-- Dynamic worker fields will be inserted here -->
                         </div>
-                        <button id="addWorkerBtn" type="button" class="mt-2 w-full text-sm bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-lg hover:bg-slate-300 transition-colors">
+                        <button id="addWorkerBtn" type="button" class="mt-2 w-full text-sm bg-slate-200 text-slate-700 font-semibold py-2 px-3 rounded-lg hover:bg-slate-300 transition-colors">
                             <i class="fas fa-plus mr-2"></i>新增工種
                         </button>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-600 mb-1">三、預計明天施作工項 <span class="text-red-500">*</span></label>
-                        <textarea id="tomorrowsWork" rows="5" class="mt-1 w-full p-3 form-textarea" placeholder="請條列說明，例如：&#10;1. 鋼筋工程 - 9F牆筋綁紮&#10;2. 模板工程 - 9F外模組裝"></textarea>
+                        <textarea id="tomorrowsWork" rows="4" class="mt-1 w-full p-2.5 form-textarea" placeholder="請條列說明..."></textarea>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-600 mb-1">四、執行進度</label>
-                        <div class="grid grid-cols-2 gap-4 mt-1">
-                            <div><label for="cumulativeDays" class="text-xs text-gray-500">累計日曆天</label><input type="number" id="cumulativeDays" class="w-full p-3 form-input" placeholder="1015"></div>
-                            <div><label for="remainingDays" class="text-xs text-gray-500">剩餘日曆天</label><input type="number" id="remainingDays" class="w-full p-3 form-input" placeholder="724"></div>
-                            <div><label for="plannedProgress" class="text-xs text-gray-500">預計進度 (%)</label><input type="number" step="0.01" id="plannedProgress" class="w-full p-3 form-input" placeholder="31.67"></div>
-                            <div><label for="actualProgress" class="text-xs text-gray-500">實際進度 (%)</label><input type="number" step="0.01" id="actualProgress" class="w-full p-3 form-input" placeholder="31.73"></div>
+                        <div class="grid grid-cols-2 gap-3 mt-1">
+                            <div><label for="cumulativeDays" class="text-xs text-gray-500">累計日曆天</label><input type="number" id="cumulativeDays" class="w-full p-2.5 form-input" placeholder="1015"></div>
+                            <div><label for="remainingDays" class="text-xs text-gray-500">剩餘日曆天</label><input type="number" id="remainingDays" class="w-full p-2.5 form-input" placeholder="724"></div>
+                            <div><label for="plannedProgress" class="text-xs text-gray-500">預計進度 (%)</label><input type="number" step="0.01" id="plannedProgress" class="w-full p-2.5 form-input" placeholder="31.67"></div>
+                            <div><label for="actualProgress" class="text-xs text-gray-500">實際進度 (%)</label><input type="number" step="0.01" id="actualProgress" class="w-full p-2.5 form-input" placeholder="31.73"></div>
                         </div>
                     </div>
                 </div>
 
 
                 <!-- Other sections... -->
-                <div id="testFields" class="hidden space-y-4 bg-white p-4 sm:p-6 rounded-xl shadow-md"></div>
-                <div id="carFields" class="hidden space-y-4 bg-white p-4 sm:p-6 rounded-xl shadow-md"></div>
-                <div id="referralFields" class="hidden space-y-4 bg-white p-4 sm:p-6 rounded-xl shadow-md"></div>
+                <div id="testFields" class="hidden space-y-3 bg-white p-4 rounded-xl shadow-md"></div>
+                <div id="carFields" class="hidden space-y-3 bg-white p-4 rounded-xl shadow-md"></div>
+                <div id="referralFields" class="hidden space-y-3 bg-white p-4 rounded-xl shadow-md"></div>
 
             </div>
 
             <!-- Personnel Mention Card -->
-            <div class="bg-white p-4 sm:p-6 rounded-xl shadow-md">
+            <div class="bg-white p-4 rounded-xl shadow-md">
                  <label for="mentionPerson" class="block text-sm font-medium text-slate-600 mb-2">標註人員</label>
-                <select id="mentionPerson" class="w-full p-3 form-select text-base">
+                <select id="mentionPerson" class="w-full p-2.5 form-select text-base">
                     <option value="">不標註</option>
                     <option value="所長">所長</option>
                     <option value="吳淵文主任">吳淵文主任</option>
@@ -275,24 +275,24 @@
 
             <!-- Action Button -->
             <div class="pt-2">
-                <button id="generateBtn" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-4 px-4 rounded-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105 active:scale-100 duration-300">
+                <button id="generateBtn" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3 px-4 rounded-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105 active:scale-100 duration-300">
                     <i class="fas fa-paper-plane mr-2"></i>產生訊息
                 </button>
             </div>
 
             <!-- Output Area -->
             <div id="outputContainer" class="hidden pt-4">
-                <div class="bg-white p-4 sm:p-6 rounded-xl shadow-md">
-                    <h3 class="text-lg font-semibold text-slate-800 mb-3 border-b-2 border-slate-200 pb-3">產生的訊息 (可直接編輯)</h3>
-                    <div id="output" class="p-4 output-area min-h-[200px]" contenteditable="true"></div>
-                    <div class="flex flex-col sm:flex-row gap-3 mt-4">
-                        <button id="copyBtn" class="w-full sm:flex-1 bg-slate-700 hover:bg-slate-800 text-white font-bold py-3 px-4 rounded-lg shadow-md flex items-center justify-center transition-transform transform active:scale-95">
+                <div class="bg-white p-4 rounded-xl shadow-md">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-3 border-b-2 border-slate-200 pb-2">產生的訊息 (可直接編輯)</h3>
+                    <div id="output" class="p-3 output-area min-h-[150px]" contenteditable="true"></div>
+                    <div class="flex flex-col sm:flex-row gap-2 mt-3">
+                        <button id="copyBtn" class="w-full sm:flex-1 bg-slate-700 hover:bg-slate-800 text-white font-bold py-2 px-4 rounded-lg shadow-md flex items-center justify-center transition-transform transform active:scale-95">
                             <i class="fas fa-copy mr-2"></i><span>複製</span>
                         </button>
-                        <button id="shareBtn" class="w-full sm:flex-1 bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-4 rounded-lg shadow-md flex items-center justify-center transition-transform transform active:scale-95">
+                        <button id="shareBtn" class="w-full sm:flex-1 bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg shadow-md flex items-center justify-center transition-transform transform active:scale-95">
                             <i class="fas fa-share-alt mr-2"></i><span>分享</span>
                         </button>
-                        <button id="calendarBtn" class="w-full sm:flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-4 rounded-lg shadow-md flex items-center justify-center transition-transform transform active:scale-95">
+                        <button id="calendarBtn" class="w-full sm:flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded-lg shadow-md flex items-center justify-center transition-transform transform active:scale-95">
                             <i class="fas fa-calendar-plus mr-2"></i><span>新增至日曆</span>
                         </button>
                     </div>
@@ -306,6 +306,14 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // Tailwind CSS does not have p-2.5 by default. Let's add it.
+            const style = document.createElement('style');
+            style.innerHTML = `
+                .p-2\\.5 { padding: 0.625rem; }
+                .py-2\\.5 { padding-top: 0.625rem; padding-bottom: 0.625rem; }
+            `;
+            document.head.appendChild(style);
+
             // --- DOM Elements ---
             let dom = {
                 messageType: document.getElementById('messageType'),
@@ -512,8 +520,8 @@
                     const row = document.createElement('div');
                     row.className = 'worker-row flex items-center gap-2';
                     row.innerHTML = `
-                        <input type="text" class="worker-type w-1/2 p-3 form-input" placeholder="工種 (例:鋼筋工)" value="${type}">
-                        <input type="number" class="worker-count w-1/2 p-3 form-input" placeholder="人數 (工)" value="${count}">
+                        <input type="text" class="worker-type w-1/2 p-2.5 form-input" placeholder="工種 (例:鋼筋工)" value="${type}">
+                        <input type="number" class="worker-count w-1/2 p-2.5 form-input" placeholder="人數 (工)" value="${count}">
                         <button type="button" class="remove-worker-btn text-slate-400 hover:text-red-500 p-2 rounded-full transition-colors"><i class="fas fa-trash-alt"></i></button>
                     `;
                     dom.workerCountContainer.appendChild(row);
@@ -670,48 +678,48 @@
             // --- Dynamic Field Generation ---
             function createDynamicFields() {
                 // Test Fields HTML
-                dom.testFields.innerHTML = `<h2 class="text-lg font-semibold text-slate-700 border-b-2 border-slate-200 pb-3 mb-4">試驗通知</h2>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div><label for="testDate" class="block text-sm font-medium text-slate-600 mb-1">試驗日期 <span class="text-red-500">*</span></label><input type="date" id="testDate" class="mt-1 w-full p-3 form-input"></div>
-                        <div><label for="testTime" class="block text-sm font-medium text-slate-600 mb-1">試驗時間 <span class="text-red-500">*</span></label><input type="time" id="testTime" class="mt-1 w-full p-3 form-input"></div>
+                dom.testFields.innerHTML = `<h2 class="text-lg font-semibold text-slate-700 border-b-2 border-slate-200 pb-2 mb-3">試驗通知</h2>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div><label for="testDate" class="block text-sm font-medium text-slate-600 mb-1">試驗日期 <span class="text-red-500">*</span></label><input type="date" id="testDate" class="mt-1 w-full p-2.5 form-input"></div>
+                        <div><label for="testTime" class="block text-sm font-medium text-slate-600 mb-1">試驗時間 <span class="text-red-500">*</span></label><input type="time" id="testTime" class="mt-1 w-full p-2.5 form-input"></div>
                     </div>
-                    <div><label for="samplingLocation" class="block text-sm font-medium text-slate-600 mb-1">取樣位置 <span class="text-red-500">*</span></label><input type="text" id="samplingLocation" class="mt-1 w-full p-3 form-input" placeholder="例如：A棟一樓樑柱"></div>
-                    <div><label for="materialAge" class="block text-sm font-medium text-slate-600 mb-1">材齡 <span class="text-red-500">*</span></label><input type="text" id="materialAge" class="mt-1 w-full p-3 form-input" placeholder="例如：7天、28天"></div>
-                    <div><label for="testLocation" class="block text-sm font-medium text-slate-600 mb-1">試驗地點 <span class="text-red-500">*</span></label><input type="text" id="testLocation" class="mt-1 w-full p-3 form-input" placeholder="例如：XX實驗室"></div>
-                    <div><label for="willAttend" class="block text-sm font-medium text-slate-600 mb-1">是否會驗 <span class="text-red-500">*</span></label><select id="willAttend" class="w-full p-3 form-select mt-1"><option value="是">是</option><option value="否">否</option></select></div>`;
+                    <div><label for="samplingLocation" class="block text-sm font-medium text-slate-600 mb-1">取樣位置 <span class="text-red-500">*</span></label><input type="text" id="samplingLocation" class="mt-1 w-full p-2.5 form-input" placeholder="例如：A棟一樓樑柱"></div>
+                    <div><label for="materialAge" class="block text-sm font-medium text-slate-600 mb-1">材齡 <span class="text-red-500">*</span></label><input type="text" id="materialAge" class="mt-1 w-full p-2.5 form-input" placeholder="例如：7天、28天"></div>
+                    <div><label for="testLocation" class="block text-sm font-medium text-slate-600 mb-1">試驗地點 <span class="text-red-500">*</span></label><input type="text" id="testLocation" class="mt-1 w-full p-2.5 form-input" placeholder="例如：XX實驗室"></div>
+                    <div><label for="willAttend" class="block text-sm font-medium text-slate-600 mb-1">是否會驗 <span class="text-red-500">*</span></label><select id="willAttend" class="w-full p-2.5 form-select mt-1"><option value="是">是</option><option value="否">否</option></select></div>`;
 
                 // Car Fields HTML
-                dom.carFields.innerHTML = `<h2 class="text-lg font-semibold text-slate-700 border-b-2 border-slate-200 pb-3 mb-4">公務車借用</h2>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div><label for="carStartDate" class="block text-sm font-medium text-slate-600 mb-1">借用日期 <span class="text-red-500">*</span></label><input type="date" id="carStartDate" class="mt-1 w-full p-3 form-input"></div>
-                        <div><label for="carStartTime" class="block text-sm font-medium text-slate-600 mb-1">借用時間 <span class="text-red-500">*</span></label><input type="time" id="carStartTime" class="mt-1 w-full p-3 form-input"></div>
+                dom.carFields.innerHTML = `<h2 class="text-lg font-semibold text-slate-700 border-b-2 border-slate-200 pb-2 mb-3">公務車借用</h2>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div><label for="carStartDate" class="block text-sm font-medium text-slate-600 mb-1">借用日期 <span class="text-red-500">*</span></label><input type="date" id="carStartDate" class="mt-1 w-full p-2.5 form-input"></div>
+                        <div><label for="carStartTime" class="block text-sm font-medium text-slate-600 mb-1">借用時間 <span class="text-red-500">*</span></label><input type="time" id="carStartTime" class="mt-1 w-full p-2.5 form-input"></div>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div><label for="carEndDate" class="block text-sm font-medium text-slate-600 mb-1">歸還日期 <span class="text-red-500">*</span></label><input type="date" id="carEndDate" class="mt-1 w-full p-3 form-input"></div>
-                        <div><label for="carEndTime" class="block text-sm font-medium text-slate-600 mb-1">歸還時間 <span class="text-red-500">*</span></label><input type="time" id="carEndTime" class="mt-1 w-full p-3 form-input"></div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div><label for="carEndDate" class="block text-sm font-medium text-slate-600 mb-1">歸還日期 <span class="text-red-500">*</span></label><input type="date" id="carEndDate" class="mt-1 w-full p-2.5 form-input"></div>
+                        <div><label for="carEndTime" class="block text-sm font-medium text-slate-600 mb-1">歸還時間 <span class="text-red-500">*</span></label><input type="time" id="carEndTime" class="mt-1 w-full p-2.5 form-input"></div>
                     </div>
-                    <div><label for="carDestination" class="block text-sm font-medium text-slate-600 mb-1">目的地 <span class="text-red-500">*</span></label><input type="text" id="carDestination" class="mt-1 w-full p-3 form-input" placeholder="例如：市政府"></div>
-                    <div><label for="borrower" class="block text-sm font-medium text-slate-600 mb-1">借用人 <span class="text-red-500">*</span></label><input type="text" id="borrower" class="mt-1 w-full p-3 form-input" placeholder="請輸入姓名"></div>`;
+                    <div><label for="carDestination" class="block text-sm font-medium text-slate-600 mb-1">目的地 <span class="text-red-500">*</span></label><input type="text" id="carDestination" class="mt-1 w-full p-2.5 form-input" placeholder="例如：市政府"></div>
+                    <div><label for="borrower" class="block text-sm font-medium text-slate-600 mb-1">借用人 <span class="text-red-500">*</span></label><input type="text" id="borrower" class="mt-1 w-full p-2.5 form-input" placeholder="請輸入姓名"></div>`;
                 
                  // Referral Fields HTML
-                dom.referralFields.innerHTML = `<h2 class="text-lg font-semibold text-slate-700 border-b-2 border-slate-200 pb-3 mb-4">訊息轉知</h2>
+                dom.referralFields.innerHTML = `<h2 class="text-lg font-semibold text-slate-700 border-b-2 border-slate-200 pb-2 mb-3">訊息轉知</h2>
                     <div>
                         <label for="referralSource" class="block text-sm font-medium text-slate-600 mb-1">來自 <span class="text-red-500">*</span></label>
-                        <input type="text" id="referralSource" class="mt-1 w-full p-3 form-input" placeholder="例如：市府、營造廠">
+                        <input type="text" id="referralSource" class="mt-1 w-full p-2.5 form-input" placeholder="例如：市府、營造廠">
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label for="referralDate" class="block text-sm font-medium text-slate-600 mb-1">收到日期</label>
-                            <input type="date" id="referralDate" class="mt-1 w-full p-3 form-input">
+                            <input type="date" id="referralDate" class="mt-1 w-full p-2.5 form-input">
                         </div>
                         <div>
                             <label for="referralTime" class="block text-sm font-medium text-slate-600 mb-1">收到時間</label>
-                            <input type="time" id="referralTime" class="mt-1 w-full p-3 form-input">
+                            <input type="time" id="referralTime" class="mt-1 w-full p-2.5 form-input">
                         </div>
                     </div>
                     <div>
                         <label for="contactMethod" class="block text-sm font-medium text-slate-600 mb-1">聯絡方式 <span class="text-red-500">*</span></label>
-                        <select id="contactMethod" class="w-full p-3 form-select mt-1">
+                        <select id="contactMethod" class="w-full p-2.5 form-select mt-1">
                             <option value="LINE">LINE</option>
                             <option value="MAIL">MAIL</option>
                             <option value="公文">公文</option>
@@ -721,13 +729,13 @@
                      <div>
                         <label for="referralContent" class="block text-sm font-medium text-slate-600 mb-1">內容 <span class="text-red-500">*</span></label>
                         <div class="mt-1">
-                             <label class="w-full inline-flex items-center justify-center px-4 py-3 bg-slate-200 text-slate-700 font-semibold rounded-lg shadow-sm cursor-pointer hover:bg-slate-300 mb-2 transition-colors">
+                             <label class="w-full inline-flex items-center justify-center px-4 py-2.5 bg-slate-200 text-slate-700 font-semibold rounded-lg shadow-sm cursor-pointer hover:bg-slate-300 mb-2 transition-colors">
                                 <i class="fas fa-upload mr-2"></i>
                                 <span>上傳圖片辨識文字</span>
                                 <div class="loader ml-2 hidden"></div>
                             </label>
                             <input type="file" id="fileUpload" class="hidden" accept="image/*">
-                            <textarea id="referralContent" rows="5" class="w-full p-3 form-textarea" placeholder="請輸入轉知的訊息內容，或上傳圖片自動辨識..."></textarea>
+                            <textarea id="referralContent" rows="4" class="w-full p-2.5 form-textarea" placeholder="請輸入轉知的訊息內容..."></textarea>
                         </div>
                     </div>`;
 
@@ -782,3 +790,4 @@
     </script>
 </body>
 </html>
+```
