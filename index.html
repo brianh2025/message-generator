@@ -144,6 +144,7 @@
                     <option value="workReport">出工回報</option>
                     <option value="test">試驗通知</option>
                     <option value="car">公務車借用</option>
+                    <option value="material">材料進場查驗申請</option>
                     <option value="referral">訊息轉知</option>
                 </select>
             </div>
@@ -252,6 +253,7 @@
                 <!-- Other sections... -->
                 <div id="testFields" class="hidden space-y-3 bg-white p-4 rounded-xl shadow-md"></div>
                 <div id="carFields" class="hidden space-y-3 bg-white p-4 rounded-xl shadow-md"></div>
+                <div id="materialFields" class="hidden space-y-3 bg-white p-4 rounded-xl shadow-md"></div>
                 <div id="referralFields" class="hidden space-y-3 bg-white p-4 rounded-xl shadow-md"></div>
 
             </div>
@@ -322,6 +324,7 @@
                 workReportFields: document.getElementById('workReportFields'),
                 testFields: document.getElementById('testFields'),
                 carFields: document.getElementById('carFields'),
+                materialFields: document.getElementById('materialFields'),
                 referralFields: document.getElementById('referralFields'),
                 generateBtn: document.getElementById('generateBtn'),
                 clearBtn: document.getElementById('clearBtn'),
@@ -444,8 +447,8 @@
                     const savedState = JSON.parse(localStorage.getItem(APP_STATE_KEY));
                     if (savedState) {
                         dom.inputs.forEach(input => {
-                           if (document.body.contains(input) && savedState[input.id] !== undefined) {
-                                input.value = savedState[input.id];
+                            if (document.body.contains(input) && savedState[input.id] !== undefined) {
+                                 input.value = savedState[input.id];
                             }
                         });
                          // Load checkbox states for inspection
@@ -627,11 +630,23 @@
                             dom.calendarBtn.classList.remove('hidden'); dom.shareBtn.classList.remove('hidden');
                             break;
                         
+                        case 'material':
+                            const matData = {
+                                date: dom.materialDate.value, time: dom.materialTime.value, name: dom.materialName.value.trim(),
+                                spec: dom.materialSpec.value.trim(), quantity: dom.materialQuantity.value.trim(), supplier: dom.supplier.value.trim()
+                            };
+                            if (!matData.date || !matData.time || !matData.name || !matData.spec || !matData.quantity || !matData.supplier) { isValid = false; break; }
+                            title = '材料進場查驗申請';
+                            message = `[${title}]\n查驗日期：${ui.formatDateTime(matData.date, matData.time)}\n材料名稱：${matData.name}\n規格：${matData.spec}\n數量：${matData.quantity}\n廠商：${matData.supplier}`;
+                            calendarEvent = { title: `[材料查驗] ${matData.name} (${matData.supplier})`, startDate: matData.date, startTime: matData.time, location: `廠商: ${matData.supplier}`, description: message };
+                            dom.calendarBtn.classList.remove('hidden'); dom.shareBtn.classList.remove('hidden');
+                            break;
+
                         case 'referral':
                             // Referral Logic...
                             const referralData = {
                                 source: dom.referralSource.value.trim(), date: dom.referralDate.value, time: dom.referralTime.value,
-                                method: dom.contactMethod.value, content: dom.referralContent.value.trim()
+                                method: dom.contactMethod.value, content: document.getElementById('referralContent').value.trim()
                             };
                             if (!referralData.source || !referralData.content) { isValid = false; break; }
                             title = '訊息轉知';
@@ -671,7 +686,22 @@
                     }
                 },
                 addToCalendar: () => {
-                    // addToCalendar Logic...
+                    if (!calendarEvent.title) return;
+                    const formatForGoogle = (date, time) => `${date.replace(/-/g, '')}T${time.replace(/:/g, '')}00`;
+                    let googleDates;
+                    if (calendarEvent.endDate) {
+                        googleDates = `${formatForGoogle(calendarEvent.startDate, calendarEvent.startTime)}/${formatForGoogle(calendarEvent.endDate, calendarEvent.endTime)}`;
+                    } else {
+                        const endTime = new Date(new Date(`${calendarEvent.startDate}T${calendarEvent.startTime}`).getTime() + 60 * 60 * 1000).toTimeString().slice(0, 5);
+                        googleDates = `${formatForGoogle(calendarEvent.startDate, calendarEvent.startTime)}/${formatForGoogle(calendarEvent.startDate, endTime)}`;
+                    }
+                    const url = new URL('https://www.google.com/calendar/render');
+                    url.searchParams.append('action', 'TEMPLATE');
+                    url.searchParams.append('text', calendarEvent.title);
+                    url.searchParams.append('dates', googleDates);
+                    url.searchParams.append('location', calendarEvent.location);
+                    url.searchParams.append('details', calendarEvent.description);
+                    window.open(url.toString(), '_blank');
                 }
             };
             
@@ -701,6 +731,17 @@
                     <div><label for="carDestination" class="block text-sm font-medium text-slate-600 mb-1">目的地 <span class="text-red-500">*</span></label><input type="text" id="carDestination" class="mt-1 w-full p-2.5 form-input" placeholder="例如：市政府"></div>
                     <div><label for="borrower" class="block text-sm font-medium text-slate-600 mb-1">借用人 <span class="text-red-500">*</span></label><input type="text" id="borrower" class="mt-1 w-full p-2.5 form-input" placeholder="請輸入姓名"></div>`;
                 
+                 // Material Fields HTML
+                dom.materialFields.innerHTML = `<h2 class="text-lg font-semibold text-slate-700 border-b-2 border-slate-200 pb-2 mb-3">材料進場查驗申請</h2>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div><label for="materialDate" class="block text-sm font-medium text-slate-600 mb-1">查驗日期 <span class="text-red-500">*</span></label><input type="date" id="materialDate" class="mt-1 w-full p-2.5 form-input"></div>
+                        <div><label for="materialTime" class="block text-sm font-medium text-slate-600 mb-1">到達時間 <span class="text-red-500">*</span></label><input type="time" id="materialTime" class="mt-1 w-full p-2.5 form-input"></div>
+                    </div>
+                    <div><label for="materialName" class="block text-sm font-medium text-slate-600 mb-1">材料名稱 <span class="text-red-500">*</span></label><input type="text" id="materialName" class="mt-1 w-full p-2.5 form-input" placeholder="例如：混凝土"></div>
+                    <div><label for="materialSpec" class="block text-sm font-medium text-slate-600 mb-1">規格 <span class="text-red-500">*</span></label><input type="text" id="materialSpec" class="mt-1 w-full p-2.5 form-input" placeholder="例如：3000 psi"></div>
+                    <div><label for="materialQuantity" class="block text-sm font-medium text-slate-600 mb-1">數量 <span class="text-red-500">*</span></label><input type="text" id="materialQuantity" class="mt-1 w-full p-2.5 form-input" placeholder="例如：10立方米"></div>
+                    <div><label for="supplier" class="block text-sm font-medium text-slate-600 mb-1">廠商 <span class="text-red-500">*</span></label><input type="text" id="supplier" class="mt-1 w-full p-2.5 form-input" placeholder="例如：XX預拌廠"></div>`;
+
                  // Referral Fields HTML
                 dom.referralFields.innerHTML = `<h2 class="text-lg font-semibold text-slate-700 border-b-2 border-slate-200 pb-2 mb-3">訊息轉知</h2>
                     <div>
@@ -745,6 +786,9 @@
                 dom.carStartDate = document.getElementById('carStartDate'); dom.carStartTime = document.getElementById('carStartTime');
                 dom.carEndDate = document.getElementById('carEndDate'); dom.carEndTime = document.getElementById('carEndTime');
                 dom.carDestination = document.getElementById('carDestination'); dom.borrower = document.getElementById('borrower');
+                dom.materialDate = document.getElementById('materialDate'); dom.materialTime = document.getElementById('materialTime');
+                dom.materialName = document.getElementById('materialName'); dom.materialSpec = document.getElementById('materialSpec');
+                dom.materialQuantity = document.getElementById('materialQuantity'); dom.supplier = document.getElementById('supplier');
                 dom.referralSource = document.getElementById('referralSource'); dom.referralDate = document.getElementById('referralDate');
                 dom.referralTime = document.getElementById('referralTime'); dom.contactMethod = document.getElementById('contactMethod');
                 dom.fileUpload = document.getElementById('fileUpload');
@@ -790,4 +834,4 @@
     </script>
 </body>
 </html>
-```
+
